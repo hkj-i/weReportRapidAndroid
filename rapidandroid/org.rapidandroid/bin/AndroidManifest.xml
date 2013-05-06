@@ -73,7 +73,11 @@
 	<uses-permission android:name="android.permission.READ_SMS"></uses-permission>
 	<uses-permission android:name="android.permission.WRITE_SMS"></uses-permission>
 	<uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
-
+	
+	<!-- weReport: added to write to ODK instances folder -->
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="org.odk.collect.android.provider.odk.instances" />
+	
 	<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
 <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 

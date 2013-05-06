@@ -20,6 +20,9 @@
  */
 package org.rapidandroid.receiver;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -35,6 +38,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.telephony.gsm.SmsMessage;
 import android.util.Log;
 
@@ -92,10 +96,7 @@ public class SmsReceiver extends BroadcastReceiver {
 		Date now = new Date();
 		messageValues.put(RapidSmsDBConstants.Message.RECEIVE_TIME, Message.SQLDateFormatter.format(now)); // profile
 																											// has
-																											// shown
-																											// this
-																											// is
-																											// an
+																								// an
 																											// expensive
 																											// operation
 		// messageValues.put(RapidSmsDBConstants.Message.RECEIVE_TIME,
@@ -118,7 +119,84 @@ public class SmsReceiver extends BroadcastReceiver {
 			//DeleteSMSFromInbox(context, mesg);
 			context.sendBroadcast(broadcast);
 		}
+		
+
+		//buildOpenRosaXform(context, mesg);	
+
+		
 	}
+/*	
+private void buildOpenRosaXform(Context context, SmsMessage mesg) {
+		
+
+	// In order to construct an XML from a text message, we need:
+	//		- Survey ID from Aggregate
+	//		- instanceID
+	//		- field names (should match Xform)
+	//
+	//  
+
+	String xmlString = "<?xml version=\'1.0\' ?>";
+	xmlString += "<data id=\"build_Texts_1367305507\">";
+	xmlString += "<meta>";
+	xmlString += "<instanceID>uuid:284b7aae-5855-4f50-a42e-9c93127c567a</instanceID>";
+	xmlString += "</meta>";
+	xmlString += "<sender>1234567890</sender>";
+	xmlString += "<message>I'm in Aggregate!!</message>";
+	xmlString += "</data>";
+		
+		
+		
+		
+		
+		
+		
+		
+		// copied from Android dev external storage page
+		boolean mExternalStorageAvailable = false;
+		boolean mExternalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    mExternalStorageAvailable = mExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    mExternalStorageAvailable = true;
+		    mExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		}
+		
+		if (!mExternalStorageWriteable) {
+			Log.e("SaveXml","External storage not writeable");
+		}
+		if (!mExternalStorageAvailable) {
+			Log.e("SaveXml","External storage not available");
+		}
+		
+		
+		File externalStorageDir = Environment.getExternalStorageDirectory();
+		
+
+		try {
+       		// String filename = path + File.separator +
+            // path.substring(path.lastIndexOf(File.separator) + 1) + ".xml";
+        	FileWriter fw = new FileWriter(externalStorageDir.getAbsoluteFile() + "/odk/instances/text1.xml");
+        	fw.write(xmlString);
+        	fw.flush();
+        	fw.close();
+      
+        } catch (IOException e) {
+            Log.e("SaveXml","Error writing XML file");
+            e.printStackTrace();
+        }
+
+		
+	}
+*/
 
 	private void DeleteSMSFromInbox(Context context, SmsMessage mesg) {
 		try {
