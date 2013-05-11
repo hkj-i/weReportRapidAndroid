@@ -102,6 +102,8 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 				+ "\"monitor_id\" integer NULL REFERENCES \"rapidandroid_monitor\" (\"id\"),"
 				+ "\"time\" datetime NOT NULL," + "\"message\" varchar(160) NOT NULL,"
 				+ "\"is_outgoing\" bool NOT NULL," + "\"is_virtual\" bool NOT NULL,"
+				+ "\"is_sent\" integer NULL,"
+				+ "\"form_uri\" varchar(512) NULL," // TODO look up max chars for URI
 				+ "\"receive_time\" datetime NULL);";
 
 		String mCreateTable_Monitor = "CREATE TABLE \"rapidandroid_monitor\" ("
@@ -112,7 +114,8 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 
 		String mCreateTable_Form = "CREATE TABLE \"rapidandroid_form\" (" + "\"_id\" integer NOT NULL PRIMARY KEY,"
 				+ "\"formname\" varchar(32) NOT NULL UNIQUE," + "\"prefix\" varchar(16) NOT NULL UNIQUE,"
-				+ "\"description\" varchar(512) NOT NULL," + "\"parsemethod\" varchar(128) NOT NULL);";
+				+ "\"description\" varchar(512) NOT NULL," 
+				+ "\"parsemethod\" varchar(128) NOT NULL);";
 
 		String mCreateTable_FieldType = "CREATE TABLE \"rapidandroid_fieldtype\" ("
 				+ "\"_id\" integer NOT NULL PRIMARY KEY," + "\"name\" varchar(32) NOT NULL UNIQUE,"

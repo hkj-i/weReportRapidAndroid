@@ -37,7 +37,7 @@ import org.rapidsms.java.core.model.Monitor;
 import org.rapidsms.java.core.parser.IParseResult;
 import org.rapidsms.java.core.parser.service.ParsingService;
 
-
+import org.rapidandroid.content.translation.*;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderClient;
@@ -135,114 +135,24 @@ public class SmsParseReceiver extends BroadcastReceiver {
 			ParsedDataTranslator.InsertFormData(context, form, msgid, results);
 		}
 		
-		
+		XMLTranslator translator = new XMLTranslator();
 		try {
-			buildOpenRosaXform(context, intent, msgid, form);
+			translator.buildOpenRosaXform(context, msgid, form);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-	}
-	
-	// TODO throws remote exception???????
-	private void buildOpenRosaXform(Context context, Intent intent, int msgid, Form f) throws RemoteException {
-		
-
-		// In order to construct an XML from a text message, we need:
-		//		- Survey ID from Aggregate
-		//		- instanceID
-		//		- field names (should match Xform)
-		//
-		//  We'll query the database for already-parsed fields...
-		//  not doing anything with them yet.  Not sure where field names are stored,
-		//  in the form???
-
-		Cursor row = context.getContentResolver().query(Uri.parse(RapidSmsDBConstants.FormData.CONTENT_URI_PREFIX + f.getFormId()),
-											null,
-											"message_id = " + msgid,
-											null,
-											null);
-		row.moveToFirst();
-		if (row == null) {
-			Log.e("DatabaseQuery", "Query results NULL");
-		}
-		if (row.getColumnCount() == 0) {
-			Log.e("DatabaseQuery", "Query results empty");
-		}
-		for (int i = 0; i < row.getColumnCount(); i++) {
-			Log.i("DatabaseQuery", "Column " + i + " " + row.getString(i));
-		}
-		
-		
-		
-		String xmlString = "<?xml version=\'1.0\' ?>";
-		
-		// TODO this is hardcoding one specific survey
-		xmlString += "<data id=\"build_Texts_1367305507\">";
-		xmlString += "<meta>";
-		
-		// TODO need to generate this
-		xmlString += "<instanceID>uuid:" + row.getString(0) + "</instanceID>";
-		xmlString += "</meta>";
-		
-		
-		xmlString += "<sender>" + intent.getStringExtra("from") + "</sender>";
-		xmlString += "<message>" + intent.getStringExtra("body") + "</message>";
-		xmlString += "</data>";
-			
-		// copied from Android dev external storage page
-		boolean mExternalStorageAvailable = false;
-		boolean mExternalStorageWriteable = false;
-		String state = Environment.getExternalStorageState();
-
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			// We can read and write the media
-			mExternalStorageAvailable = mExternalStorageWriteable = true;
-		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			// We can only read the media
-			mExternalStorageAvailable = true;
-			mExternalStorageWriteable = false;
-		} else {
-			// Something else is wrong. It may be one of many other states, but all we need
-			//  to know is we can neither read nor write
-			mExternalStorageAvailable = mExternalStorageWriteable = false;
-		}
-
-		if (!mExternalStorageWriteable) {
-			Log.e("SaveXml","External storage not writeable");
-		}
-		if (!mExternalStorageAvailable) {
-			Log.e("SaveXml","External storage not available");
-		}
-
-
-		File externalStorageDir = Environment.getExternalStorageDirectory();
-
-
+		/*
 		try {
-			// String filename = path + File.separator +
-			// path.substring(path.lastIndexOf(File.separator) + 1) + ".xml";
-			FileWriter fw = new FileWriter(externalStorageDir.getAbsoluteFile() + "/odk/instances/Texts_2013-04-30_07-05-21/text" + row.getString(0) + ".xml");
-			fw.write(xmlString);
-			fw.flush();
-			fw.close();
-
-		} catch (IOException e) {
-			Log.e("SaveXml","Error writing XML file");
+			//buildOpenRosaXform(context, intent, msgid, form);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		*/
 		
-		// Now we need to add these to the odk db
-		ContentValues cv = new ContentValues();
-		
-		cv.put("instanceFilePath", externalStorageDir.getAbsoluteFile() + "/odk/instances/Texts_2013-04-30_07-05-21/text" + row.getString(0) + ".xml");
-		cv.put("jrVersion", 1.0);
-		cv.put("jrFormId", row.getString(0));
-		cv.put("submissionUri", "build_Texts_1367305507");
-		cv.put("displayName", "Text" + row.getString(0));
-		
-		Uri uri = context.getContentResolver().insert(Uri.parse("content://org.odk.collect.android.provider.odk.instances"), cv);
 	}
+	
+
 }
