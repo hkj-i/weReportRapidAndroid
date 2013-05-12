@@ -572,8 +572,56 @@ public class RapidSmsContentProvider extends ContentProvider {
 	 * android.content.ContentValues, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
-		throw new IllegalArgumentException("Update not implemented");
+	public int update(Uri uri, ContentValues valuesToChange, String selection, String[] selectionArgs) {
+		
+		// Taken from remove method
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+		String table;
+		String finalWhere = "";
+
+		switch (sUriMatcher.match(uri)) {
+			case MESSAGE:
+				table = RapidSmsDBConstants.Message.TABLE;
+				break;
+
+			case MESSAGE_ID:
+				table = RapidSmsDBConstants.Message.TABLE;
+				/*finalWhere = BaseColumns._ID + "=" + uri.getPathSegments().get(1)
+						+ (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : "");*/
+				break;
+			case MONITOR:
+				table = RapidSmsDBConstants.Monitor.TABLE;
+				break;
+
+			case MONITOR_ID:
+				table = RapidSmsDBConstants.Monitor.TABLE;
+				/*finalWhere = BaseColumns._ID + "=" + uri.getPathSegments().get(1)
+						+ (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : "");*/
+				break;
+			case MONITOR_MESSAGE_ID:
+				table = RapidSmsDBConstants.Message.TABLE;
+				// qb.appendWhere(RapidSmsDBConstants.Message.MONITOR + "="
+				// + uri.getPathSegments().get(1));
+
+				/*finalWhere = RapidSmsDBConstants.Message.MONITOR + "=" + uri.getPathSegments().get(1)
+						+ (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : "");*/
+				break;
+			case FORMDATA_ID:
+				// need to set the table to the FieldData + form_prefix
+				// this is possible via querying hte forms to get the
+				// formname/prefix from the form table definition
+				// and appending that to do the qb.setTables
+				String formid = uri.getPathSegments().get(1);
+				Form f = ModelTranslator.getFormById(Integer.valueOf(formid).intValue());
+				table = RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix();
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+		
+		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+		return db.update(table, valuesToChange, selection, selectionArgs);
 	}
 
 	/*
