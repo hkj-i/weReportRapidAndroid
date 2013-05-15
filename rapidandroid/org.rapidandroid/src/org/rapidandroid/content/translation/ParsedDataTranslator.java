@@ -33,6 +33,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Helper class to simplify the insertion and querying of parsed form data from
@@ -57,12 +58,25 @@ public class ParsedDataTranslator {
 	 */
 	public static boolean InsertFormData(Context context, Form f, int message_id, Vector<IParseResult> results) {
 
+		Log.i("InsertFormData", "Message id: " + message_id);
+		Log.i("InsertFormData", "Form name: " + f.getFormName());
+		Log.i("InsertFormData", "Form description: " + f.getDescription());
+		Log.i("InsertFormData", "Form id: " + f.getFormId());
+		Log.i("InsertFormData", "Form prefix: " + f.getPrefix());
+		for (int i = 0; i < f.getFields().length; i++) {	
+			Log.i("InsertFormData", "Form field: " + f.getFields()[i]);
+		}
+
+		for (int i = 0; i < results.size(); i++) {
+			Log.i("InsertFormData", "result " + i + " " + results.get(i).toString());
+		}
+		
 		ContentValues cv = new ContentValues();
 		cv.put(RapidSmsDBConstants.FormData.MESSAGE, message_id);
 		Field[] fields = f.getFields();
 		int len = fields.length;
 		Random r = new Random();
-
+		Log.i("InsertFormData", "starting for loop");
 		for (int i = 0; i < len; i++) {
 			Field field = fields[i];
 			IParseResult res = results.get(i);
@@ -72,9 +86,11 @@ public class ParsedDataTranslator {
 				cv.put(RapidSmsDBConstants.FormData.COLUMN_PREFIX + field.getName(), "");
 			}
 		}
+		Log.i("InsertFormData", "exiting for loop");
 		Uri inserted = context.getContentResolver().insert(
 															Uri.parse(RapidSmsDBConstants.FormData.CONTENT_URI_PREFIX
 																	+ f.getFormId()), cv);
+		Log.i("InsertFormData", "inserted");
 		return true;
 	}
 

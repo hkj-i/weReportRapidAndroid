@@ -78,10 +78,23 @@ public class SmsParseReceiver extends BroadcastReceiver {
 	}
 
 	private Form determineForm(String message) {
+		for (int i = 0; i < forms.length; i++) {
+			if (forms[i] == null) {
+				Log.i("SmsParseReceiver", "form " + i + " is null");
+			} else {
+				Log.i("SmsParseReceiver", "form " + i + " is " + forms[i].getFormName());
+			}
+		}
+		
 		int len = prefixes.length;
+		Log.i("SmsParseReceiver", "num prefixes: " + len);
 		for (int i = 0; i < len; i++) {
+			Log.i("SmsParseReceiver", "prefix: " + prefixes[i].toLowerCase());
 			String prefix = prefixes[i];
-			if (message.toLowerCase().trim().startsWith(prefix + " ")) {
+			Log.i("SmsParseReceiver", "beginning of message: " + message.toLowerCase().trim().substring(0, prefixes[i].length()));
+			// TODO changed this to be any case.
+			if (message.toLowerCase().trim().startsWith(prefix.toLowerCase() + " ")) {
+				Log.i("SmsParseReceiver", "match! returning form " + i);
 				return forms[i];
 			}
 		}
@@ -102,6 +115,9 @@ public class SmsParseReceiver extends BroadcastReceiver {
 			initFormCache(); // profiler shows us that this is being called
 								// frequently on new messages.
 		}
+		
+		Log.i("SmsParseReciever", "Initialized form cache");
+		
 		// TODO Auto-generated method stub
 		String body = intent.getStringExtra("body");
 
@@ -111,28 +127,36 @@ public class SmsParseReceiver extends BroadcastReceiver {
 		}
 
 		int msgid = intent.getIntExtra("msgid", 0);
-
+		Log.i("SmsParseReciever", "msgid " + msgid);
 		Form form = determineForm(body);
+		Log.i("SmsParseReciever", "form " + form);
 		if (form == null) {			
-			if (ApplicationGlobals.doReplyOnFail()) {
+			/*if (ApplicationGlobals.doReplyOnFail()) {
 				Intent broadcast = new Intent("org.rapidandroid.intents.SMS_REPLY");
 				broadcast.putExtra(SmsReplyReceiver.KEY_DESTINATION_PHONE, intent.getStringExtra("from"));
 				broadcast.putExtra(SmsReplyReceiver.KEY_MESSAGE, ApplicationGlobals.getParseFailText());
 				context.sendBroadcast(broadcast);
-			}
+			}*/
+			Log.i("SmsParseReciever", "null form");
 			return;
 		} else {
+			
 			Monitor mon = MessageTranslator.GetMonitorAndInsertIfNew(context, intent.getStringExtra("from"));
+			
+			Log.i("SmsParseReceiver", "made it through messagetranslator call");
+			
 			// if(mon.getReplyPreference()) {
-			if (ApplicationGlobals.doReplyOnParse()) {
+			/*if (ApplicationGlobals.doReplyOnParse()) {
 				// for debug purposes, we'll just ack every time.
 				Intent broadcast = new Intent("org.rapidandroid.intents.SMS_REPLY");
 				broadcast.putExtra(SmsReplyReceiver.KEY_DESTINATION_PHONE, intent.getStringExtra("from"));
 				broadcast.putExtra(SmsReplyReceiver.KEY_MESSAGE, ApplicationGlobals.getParseSuccessText());
 				context.sendBroadcast(broadcast);
-			}
+			}*/
 			Vector<IParseResult> results = ParsingService.ParseMessage(form, body);
+			Log.i("SmsParseReceiver", "made it through parsingservice call");
 			ParsedDataTranslator.InsertFormData(context, form, msgid, results);
+			Log.i("SmsParseReceiver", "made it through insertformdata");
 		}
 		
 		XMLTranslator translator = new XMLTranslator();

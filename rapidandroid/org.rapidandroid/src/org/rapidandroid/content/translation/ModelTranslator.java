@@ -194,7 +194,7 @@ public class ModelTranslator {
 			}
 		}
 		int formcount = allformsCursor.getCount();
-
+	
 		Form[] ret = new Form[formcount];
 		allformsCursor.moveToFirst();
 		for (int i = 0; i < formcount; i++) {
