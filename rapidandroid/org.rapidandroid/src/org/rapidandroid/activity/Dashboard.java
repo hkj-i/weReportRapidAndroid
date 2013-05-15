@@ -27,6 +27,7 @@ import java.util.Date;
 
 import org.rapidandroid.R;
 import org.rapidandroid.content.translation.ModelTranslator;
+import org.rapidandroid.data.RapidSmsDBConstants;
 import org.rapidandroid.data.controller.DashboardDataLayer;
 import org.rapidandroid.data.controller.MessageDataReporter;
 import org.rapidandroid.data.controller.ParsedDataReporter;
@@ -42,8 +43,12 @@ import org.rapidsms.java.core.model.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -151,7 +156,11 @@ public class Dashboard extends Activity {
 	private ImageButton mBtnViewModeSwitcher;
 
 	private Form[] mAllForms;
-
+	
+	// hee
+	private String mChosenMessage = null; // hee
+	// hee
+		
 	boolean mIsInitializing = false;
 	boolean resetCursor = true;
 	Cursor mListviewCursor = null;
@@ -385,17 +394,65 @@ public class Dashboard extends Activity {
 
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-		Bundle extras = null;
-		if (intent != null) {
-			extras = intent.getExtras(); // right now this is a case where we
-			// don't do much activity back and
-			// forth
-		}
+	// hee
+	private void createInstanceAndCallODK(Uri formData) {
+	        AlertDialog.Builder alert = new AlertDialog.Builder(Dashboard.this);
+	        
+			String path = formData.getPath();
+			String folder = "/forms/";
+			String formId = path.substring(path.indexOf("/forms/") + folder.length());
+			
+			ContentResolver resolver = this.getContentResolver();
+			Cursor formInfoRow = resolver.query(Uri.parse("content://org.odk.collect.android.provider.odk.forms/forms"),
+												null,
+												"_id = " + formId,
+												null,
+												null);
+			
+			formInfoRow.moveToFirst();
+			String formName = formInfoRow.getString(formInfoRow.getColumnIndex("jrFormId"));
+			
+			
+			// now get message id from chosen message
+			// get the message body
+			// and save an xml
+			// and open collect
+			
+			Cursor messageRow = resolver.query(RapidSmsDBConstants.Message.CONTENT_URI, 
+					null, 
+					"_id = " + mChosenMessage, 
+					null, 
+					null);
+			messageRow.moveToFirst();			
 
-		switch (requestCode) {
+			String messageBody = messageRow.getString(messageRow.getColumnIndex("message"));
+			
+			// TODO
+			// call XML parser and open collect
+		}
+		
+		
+		
+		
+		@Override
+		protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+			super.onActivityResult(requestCode, resultCode, intent);
+			Bundle extras = null;
+			if (intent != null) {
+				extras = intent.getExtras(); // right now this is a case where we
+				// don't do much activity back and
+				// forth
+			}
+
+			switch (requestCode) {
+			    // hee code
+			    case 7:
+			    	if (resultCode == RESULT_OK) {
+			    		createInstanceAndCallODK(intent.getData());
+			    	}
+			    	break;
+			    	//end
+
 			case ACTIVITY_CREATE:
 				// we should do an update of the view
 				initFormSpinner();
@@ -794,7 +851,110 @@ public class Dashboard extends Activity {
 				rowView = new FormDataGridCursorAdapter(this, mChosenForm, mListviewCursor, mScreenWidth);
 				lsv.setAdapter(rowView);
 			}
-		}
+			
+			// hee TODO
+			lsv.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> adapter, View view, int position, long row) {
+					Cursor c = mListviewCursor;
+					
+					c.moveToPosition(position);
+					ContentResolver resolver = getContentResolver();
+
+			//		String[] splitMessage = messageRow.getString(messageRow.getColumnIndex("message")).split(" "); 
+					
+					String messageId = null;
+					if (c.getColumnIndex("message_id") == -1
+							&& mFormViewMode == Dashboard.LISTVIEW_MODE_TABLE_VIEW) {
+						
+						Log.i("entered", "hi");
+												
+						messageId = c.getString(c.getColumnIndex("_id"));
+						
+						Log.i("all surveys - id : ", messageId);
+						
+						
+						if (c.getString(c.getColumnIndex("form_uri")) == null) {
+							// instance file doesn't exist; create one
+							// direct the user to choose a form
+							mChosenMessage = messageId;
+							
+							// if form doesnt exist already
+							
+							
+							// find form 
+							// choose form
+						     ContentValues formvalues = new ContentValues();
+						     Intent formintent = new Intent();
+						     formintent.setComponent(new ComponentName("org.odk.collect.android",
+						             "org.odk.collect.android.activities.FormChooserList"));
+						     formintent.setAction(Intent.ACTION_PICK);
+						     startActivityForResult(formintent, 7); // seven is a random number TODO
+						     
+						} else {
+							// instance file exists
+							// grab the uri and open it
+							
+							Uri messageUri = Uri.parse(
+									c.getString(c.getColumnIndex("form_uri")).substring(16));
+							Log.i("form uri URI ",c.getString(c.getColumnIndex("form_uri")).substring(15));
+							
+						     Intent intent = new Intent();
+						     intent.setComponent(new ComponentName("org.odk.collect.android",
+						             "org.odk.collect.android.activities.FormEntryActivity"));
+						     intent.setAction(Intent.ACTION_EDIT);
+						     intent.setData(messageUri);
+						     
+						    // startActivity(intent);
+						     // hee TODO uncomment this out
+							
+						}
+						
+						
+					     
+					} else if (mFormViewMode == Dashboard.LISTVIEW_MODE_TABLE_VIEW) {
+						messageId = c.getString(c.getColumnIndex("message_id"));
+						
+						Log.i("particular survey - id : ", messageId);
+						mChosenMessage = null;
+						// get the uri
+						// and open it on collect
+						Cursor messageRow = resolver.query(RapidSmsDBConstants.Message.CONTENT_URI, 
+								null, 
+								"_id = " + messageId, 
+								null, 
+								null);
+						messageRow.moveToFirst();			
+						for (int i = 0; i < messageRow.getColumnCount(); i++) {
+						   	Log.i(i + " COlum name: ", messageRow.getColumnName(i));
+					
+						}
+						messageRow.moveToFirst();
+						
+						if (messageRow.getString(messageRow.getColumnIndex("form_uri")) != null) {
+							Log.i("form uri: ", messageRow.getString(messageRow.getColumnIndex("form_uri")));
+							Uri messageUri = Uri.parse(
+									messageRow.getString(messageRow.getColumnIndex("form_uri")).substring(16));
+							Log.i("form uri URI ", messageRow.getString(messageRow.getColumnIndex("form_uri")).substring(15));
+							
+						     Intent intent = new Intent();
+						     intent.setComponent(new ComponentName("org.odk.collect.android",
+						             "org.odk.collect.android.activities.FormEntryActivity"));
+						     intent.setAction(Intent.ACTION_EDIT);
+						     intent.setData(messageUri);
+						     
+						    // startActivity(intent);
+						     // hee TODO uncomment this out
+						} else {
+							// TODO here too
+						}
+						
+					}
+					// end hee
+				}
+				
+			}); // end of onclick listener
+
+		} // form view mode
 
 	}
 
