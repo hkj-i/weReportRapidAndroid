@@ -20,6 +20,7 @@
  */
 package org.rapidandroid.activity;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +30,7 @@ import org.rapidandroid.content.translation.ModelTranslator;
 import org.rapidandroid.data.controller.DashboardDataLayer;
 import org.rapidandroid.data.controller.MessageDataReporter;
 import org.rapidandroid.data.controller.ParsedDataReporter;
+import org.rapidandroid.receiver.FormCreationFileObserver;
 import org.rapidandroid.view.SingleRowHeaderView;
 import org.rapidandroid.view.adapter.FormDataGridCursorAdapter;
 import org.rapidandroid.view.adapter.MessageCursorAdapter;
@@ -43,8 +45,10 @@ import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -291,8 +295,18 @@ public class Dashboard extends Activity {
 				beginListViewReload();
 			}
 		});
+		
+		// TODO I added this code, hope it doesn't break things...
+		
+		File externalStorageDir = Environment.getExternalStorageDirectory();
+		String odkFormsPath = externalStorageDir.getAbsoluteFile() + "/odk/forms/";
+		formWatcher = new FormCreationFileObserver(odkFormsPath);
+		formWatcher.addContext(this);
+		formWatcher.startWatching();
+		Log.i("Dashboard", "Called file observer constructer");
+		
 	}
-
+	private FormCreationFileObserver formWatcher;
 	/*
 	 * (non-Javadoc)
 	 * 

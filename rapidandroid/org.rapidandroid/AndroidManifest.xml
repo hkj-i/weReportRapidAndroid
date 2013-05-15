@@ -77,6 +77,7 @@
 	
 	<!-- weReport: added to write to ODK instances folder -->
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="org.odk.collect.android.provider.odk.instances" />
 	
 	<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>

@@ -174,7 +174,8 @@ public class XMLTranslator {
 		
 		// generate xml string
 		XML += "<?xml version=\'1.0\' ?>";
-		XML += "<data id=\"" + processSpecialCharacters(f.getFormName()) + "\">";
+		String processedFormName = processSpecialCharacters(f.getFormName());
+		XML += "<" + processedFormName + " id=\"" + processedFormName + "\">";
 		XML += "<meta>";
 		
 		// TODO need to generate this
@@ -210,7 +211,7 @@ public class XMLTranslator {
 			Log.i("DatabaseQuery", "XML malformed: number of fields in response " + messageRow.getString(messageRow.getColumnIndex("message")).split(" ").length + ", number of fields expected " + f.getFields().length);
 			wellFormed = 0;
 		}
-		XML += "</data>";
+		XML += "</" + processedFormName + ">";
 		
 		Log.i("DatabaseQuery", "XML string: " + XML);
 		
@@ -261,10 +262,36 @@ public class XMLTranslator {
 			e.printStackTrace();
 		}
 
+		// Now we need to add these to the odk db
+
+		
+		ContentResolver resolver = context.getContentResolver();
+	     ContentValues values = new ContentValues();
+	     values.put("displayName", f.getFormName() + " " + msgid); // make your own display name~
+	     values.put("status", "incomplete"); // you can mark it as complete
+	     values.put("canEditWhenComplete", Boolean.toString(true));
+	     values.put("instanceFilePath", 
+	    		 newFolder + "/" + instanceName + ".xml"); // file path
+	     values.put("jrFormId", f.getFormName()); // the form id; the form I used happened to have id = "st2"
+	     // only add the version if it exists (ie not null)
+	     // now we want to get the uri for the insertion.
+	     Uri uriOfForm = resolver.insert(
+	    		 Uri.parse("content://org.odk.collect.android.provider.odk.instances/instances"),
+	    		 values);
+	     
+	     String[] projection = {"_id"};
+	     
+	     Cursor row = (resolver.query(Uri.parse("content://org.odk.collect.android.provider.odk.instances/instances"), 
+	    		 					projection, 
+	    		 					"instanceFilePath = \"" + newFolder + "/" + instanceName + ".xml\"", 
+	    		 					null, null));
+		row.moveToFirst();
+		int rowId = row.getShort(0);
+		
 		// Update RapidAndroid DB with uri and well-formed
 		ContentResolver rapidResolver = context.getContentResolver();
 		ContentValues rapidValues = new ContentValues();
-		rapidValues.put("form_uri", (newFolder + "/" + instanceName + ".xml").toString());
+		rapidValues.put("form_uri", (newFolder + "/" + rowId).toString());
 		rapidValues.put("is_sent", wellFormed);
 	     int colsChanged = rapidResolver.update(
 	    		 RapidSmsDBConstants.Message.CONTENT_URI,
@@ -288,22 +315,7 @@ public class XMLTranslator {
 				Log.i("DatabaseQuery", "Column " + i + " " + messageRow1.getString(i));
 			}
 		
-		// Now we need to add these to the odk db
 
-		
-		ContentResolver resolver = context.getContentResolver();
-	     ContentValues values = new ContentValues();
-	     values.put("displayName", f.getFormName() + " " + msgid); // make your own display name~
-	     values.put("status", "incomplete"); // you can mark it as complete
-	     values.put("canEditWhenComplete", Boolean.toString(true));
-	     values.put("instanceFilePath", 
-	    		 newFolder + "/" + instanceName + ".xml"); // file path
-	     values.put("jrFormId", f.getFormName()); // the form id; the form I used happened to have id = "st2"
-	     // only add the version if it exists (ie not null)
-	     // now we want to get the uri for the insertion.
-	     Uri uriOfForm = resolver.insert(
-	    		 Uri.parse("content://org.odk.collect.android.provider.odk.instances/instances"),
-	    		 values);
 	}
 	
 	private String processSpecialCharacters(String string) {
