@@ -19,7 +19,7 @@
  * 
  */
 package org.rapidsms.java.core.parser;
-
+import android.util.Log; 
 import java.util.Vector;
 
 import org.rapidsms.java.core.model.Field;
@@ -74,10 +74,11 @@ public class SimpleRegexParser implements IMessageParser {
 		String prefix = f.getPrefix();
 		// System.out.println("what's the fracking form prefix: " + prefix);
 		input = input.toLowerCase().trim();
-		if (input.startsWith(prefix + " ")) {
-
+		if (input.startsWith(prefix.toLowerCase() + " ")) {
+			Log.i("SimpleRegexParsingService", "input started with prefix, input: " + input);
 			input = input.substring(prefix.length()).trim();
 		} else {
+			
 			return null;
 		}
 
@@ -86,6 +87,10 @@ public class SimpleRegexParser implements IMessageParser {
 		int length = fields.length;
 
 		for (int i = 0; i < length; i++) {
+			Log.i("SimpleRegexParsingService", "field" + i + ": " + fields[i].getName());
+			Log.i("SimpleRegexParsingService", "field" + i + ": " + fields[i].getFieldType().getParsedDataType());
+
+			Log.i("SimpleRegexParsingService", "field" + i + ": " + fields[i].getFieldType().getReadableName());
 			ITokenParser parser = fields[i].getFieldType();
 			// System.out.println("Begin field parse: [" + fields[i].getName() +
 			// "] on input: {" + input + "}");
