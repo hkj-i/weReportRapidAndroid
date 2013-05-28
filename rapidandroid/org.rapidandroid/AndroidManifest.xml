@@ -5,11 +5,11 @@
 
 <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="17" />
 
-	<application android:label="@string/app_name" android:name="RapidAndroidApplication" android:icon="@drawable/rapidandroid" android:debuggable="true">
+	<application android:label="@string/app_name" android:name="RapidAndroidApplication" android:theme="@android:style/Theme.Light" android:debuggable="true">
 		
 		<provider android:authorities="org.rapidandroid.provider.RapidSms" android:name=".content.RapidSmsContentProvider">
 		</provider>
-		<activity android:label="@string/app_name" android:name=".activity.Dashboard">
+		<activity android:label="@string/app_name" android:name=".activity.Main">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -46,7 +46,7 @@
 			</intent-filter>
 		</receiver>
 		<activity android:name=".activity.FormReviewer"></activity>
-		
+		<activity android:name=".activity.Dashboard"></activity>
 		<activity android:name=".activity.FormCreator"></activity>
 		
 
@@ -56,6 +56,12 @@
 </intent-filter>
 </receiver>
 <activity android:name=".activity.ChartData"></activity>
+<activity android:name=".activity.ProjectChooser"></activity>
+<activity android:name=".activity.PhaseChooser"></activity>
+<activity android:name=".activity.CreateProject"></activity>
+<activity android:name=".activity.SurveyCreator"></activity>
+<activity android:name=".activity.QuestionVerifier"></activity>
+<activity android:name=".activity.QuestionChooser"></activity>
 <activity android:name=".activity.AddField" android:theme="@android:style/Theme.Dialog"></activity>
 <activity android:name=".activity.FileBrowser"></activity>
 <activity android:name=".activity.DateRange"></activity>

@@ -131,20 +131,36 @@ public class ModelTranslator {
 			StringBuilder where = new StringBuilder();
 			where.append("name='" + thefield.getName() + "' AND ");
 			where.append("form_id=" + newFormId);
+			
+			Log.i("ModelTranslator", "where clause: " + where.toString());
+			
 			Cursor crfield = mContext.getContentResolver().query(fieldUri, null, where.toString(), null, null);
 			if (crfield.getCount() == 0) {
+				
+				Log.i("ModelTranslator", "building field cvs");
+				
 				ContentValues fieldcv = new ContentValues();
 
 				if (thefield.getFieldId() != -1) {
 					fieldcv.put(BaseColumns._ID, thefield.getFieldId());
 				}
+				Log.i("ModelTranslator", "name: " + thefield.getName());
 				fieldcv.put(RapidSmsDBConstants.Field.NAME, thefield.getName());
+				
+				Log.i("ModelTranslator", "form: " + f.getFormId());
 				fieldcv.put(RapidSmsDBConstants.Field.FORM, f.getFormId());
+				
+				Log.i("ModelTranslator", "prompt: " + thefield.getDescription());
 				fieldcv.put(RapidSmsDBConstants.Field.PROMPT, thefield.getDescription());
+				
+				Log.i("ModelTranslator", "sequence: " + thefield.getSequenceId());
 				fieldcv.put(RapidSmsDBConstants.Field.SEQUENCE, thefield.getSequenceId());
 
+				Log.i("ModelTranslator", "fieldtype: " + ((thefield.getFieldType())));
+				Log.i("ModelTranslator", "fieldtype: " + ((SimpleFieldType) (thefield.getFieldType())).getId());
 				fieldcv.put(RapidSmsDBConstants.Field.FIELDTYPE, ((SimpleFieldType) (thefield.getFieldType())).getId());
 
+				Log.i("ModelTranslator", "inserting field");
 				Uri insertedFieldUri = mContext.getContentResolver().insert(RapidSmsDBConstants.Field.CONTENT_URI,
 																			fieldcv);
 				Log.d("dimagi", "********** Inserted Field into db: " + insertedFieldUri);
@@ -484,7 +500,7 @@ public class ModelTranslator {
 
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		try {
-			Cursor formdatacursor = db.rawQuery("select * from formdata_" + form.getPrefix() + ";", null);
+			Cursor formdatacursor = db.rawQuery("select * from formdata_" + form.getPrefix().replace("@", "") + ";", null);
 			if (formdatacursor.getCount() > 0) {
 				return;
 			} else {
@@ -497,7 +513,7 @@ public class ModelTranslator {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("create table formdata_");
-		sb.append(form.getPrefix());
+		sb.append(form.getPrefix().replace("@", ""));
 		sb.append(" (");
 		sb.append(" \"_id\" integer not null PRIMARY KEY, ");
 		sb.append(" \"message_id\" integer not null references \"message\", ");

@@ -65,6 +65,7 @@ public class ParsedDataTranslator {
 		Log.i("InsertFormData", "Form prefix: " + f.getPrefix());
 		for (int i = 0; i < f.getFields().length; i++) {	
 			Log.i("InsertFormData", "Form field: " + f.getFields()[i]);
+			Log.i("InsertFormData", "Form field: " + f.getFields()[i].getFieldType().getReadableName());
 		}
 
 		for (int i = 0; i < results.size(); i++) {

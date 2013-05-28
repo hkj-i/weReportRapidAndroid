@@ -71,6 +71,77 @@ public final class RapidSmsDBConstants {
 	}
 
 	/**
+	 * Project table
+	 */
+	public static final class Project implements BaseColumns {
+
+		public static final String TABLE = "rapidandroid_project";
+
+		public static final String URI_PART = "project";
+		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + URI_PART);
+		public static final String CONTENT_URI_STRING = "content://" + AUTHORITY + "/" + URI_PART + "/";
+
+		// TODO maybe look into uncommenting these?
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/org.rapidandroid.data.project";
+		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/org.rapidandroid.data.project";
+
+		// Section Table columns ##########################################
+		/**
+		 * 
+		 * Phone field is a helper for inserting to the content provider.
+		 * columnm is there as legacy, but shouldn't be used.
+		 */
+		/*public static final String PHONE = "phone";
+
+		public static final String MESSAGE = "message";
+		/**
+		 * The monitorID of the sender. theMonitor must exist before a message
+		 * can be inserted.
+		 */
+		/*public static final String MONITOR = "monitor_id";
+		public static final String TIME = "time";
+		public static final String IS_OUTGOING = "is_outgoing";
+		public static final String IS_VIRTUAL = "is_virtual";
+		public static final String RECEIVE_TIME = "receive_time";*/
+	}
+	
+	/**
+	 * Project table
+	 */
+	public static final class Survey implements BaseColumns {
+
+		public static final String TABLE = "rapidandroid_survey";
+
+		public static final String URI_PART = "survey";
+		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + URI_PART);
+		public static final String CONTENT_URI_STRING = "content://" + AUTHORITY + "/" + URI_PART + "/";
+
+		// TODO maybe look into uncommenting these?
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/org.rapidandroid.data.survey";
+		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/org.rapidandroid.data.survey";
+
+		// Section Table columns ##########################################
+		/**
+		 * 
+		 * Phone field is a helper for inserting to the content provider.
+		 * columnm is there as legacy, but shouldn't be used.
+		 */
+		/*public static final String PHONE = "phone";
+
+		public static final String MESSAGE = "message";
+		/**
+		 * The monitorID of the sender. theMonitor must exist before a message
+		 * can be inserted.
+		 */
+		/*public static final String MONITOR = "monitor_id";
+		public static final String TIME = "time";
+		public static final String IS_OUTGOING = "is_outgoing";
+		public static final String IS_VIRTUAL = "is_virtual";
+		public static final String RECEIVE_TIME = "receive_time";*/
+	}
+	
+	
+	/**
 	 * Monitor table
 	 */
 	public static final class Monitor implements BaseColumns {

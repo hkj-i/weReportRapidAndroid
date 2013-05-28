@@ -17,6 +17,8 @@
 
 package org.rapidandroid.content;
 
+import java.util.Map;
+
 import org.rapidandroid.content.translation.MessageTranslator;
 import org.rapidandroid.content.translation.ModelTranslator;
 import org.rapidandroid.data.RapidSmsDBConstants;
@@ -26,16 +28,15 @@ import org.rapidsms.java.core.model.Form;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * Main Content provider for the RapidAndroid project.
@@ -78,6 +79,8 @@ public class RapidSmsContentProvider extends ContentProvider {
 	private SmsDbHelper mOpenHelper;
 
 	private static final int MESSAGE = 1;
+	private static final int PROJECT = 13;
+	private static final int SURVEY = 14;
 	private static final int MESSAGE_ID = 2;
 	private static final int MONITOR = 3;
 	private static final int MONITOR_ID = 4;
@@ -118,6 +121,9 @@ public class RapidSmsContentProvider extends ContentProvider {
 
 		// actual form data
 		sUriMatcher.addURI(RapidSmsDBConstants.AUTHORITY, RapidSmsDBConstants.FormData.URI_PART + "/#", FORMDATA_ID);
+	
+		sUriMatcher.addURI(RapidSmsDBConstants.AUTHORITY, RapidSmsDBConstants.Project.URI_PART, PROJECT);
+		sUriMatcher.addURI(RapidSmsDBConstants.AUTHORITY, RapidSmsDBConstants.Survey.URI_PART, SURVEY);
 	}
 
 	/*
@@ -130,6 +136,10 @@ public class RapidSmsContentProvider extends ContentProvider {
 		switch (sUriMatcher.match(uri)) {
 			case MESSAGE:
 				return RapidSmsDBConstants.Message.CONTENT_TYPE;
+			case PROJECT:
+				return RapidSmsDBConstants.Project.CONTENT_TYPE;
+			case SURVEY:
+				return RapidSmsDBConstants.Survey.CONTENT_TYPE;
 			case MESSAGE_ID:
 				return RapidSmsDBConstants.Message.CONTENT_ITEM_TYPE;
 			case MONITOR:
@@ -187,6 +197,10 @@ public class RapidSmsContentProvider extends ContentProvider {
 		switch (sUriMatcher.match(uri)) {
 			case MESSAGE:
 				return insertMessage(uri, values);
+			case PROJECT:
+				return insertProject(uri, values);
+			case SURVEY:
+				return insertSurvey(uri, values);
 			case MONITOR:
 				return insertMonitor(uri, values);
 			case FIELDTYPE:
@@ -208,7 +222,7 @@ public class RapidSmsContentProvider extends ContentProvider {
 	private Uri insertFormData(Uri uri, ContentValues values) {
 		// sanity check, see if the table exists
 		String formid = uri.getPathSegments().get(1);
-		String formprefix = ModelTranslator.getFormById(Integer.valueOf(formid).intValue()).getPrefix();
+		String formprefix = ModelTranslator.getFormById(Integer.valueOf(formid).intValue()).getPrefix().replace("@", "");
 		// SQLiteDatabase dbr = mOpenHelper.getReadableDatabase();
 		// Cursor table_exists = dbr.rawQuery("select count(*) from formdata_"
 		// + formprefix, null);
@@ -249,6 +263,11 @@ public class RapidSmsContentProvider extends ContentProvider {
 
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
+		
+		Log.i("RapidSmsContentProvider", "tablename: " + tablename);
+		for (Map.Entry<String, Object> pair : values.valueSet()) {
+			Log.i("RapidSmsContentProvider", "cv " + pair.getKey() + " " + pair.getValue());
+		}
 		long rowId = db.insert(tablename, nullvalue, values);
 		if (rowId > 0) {
 			Uri retUri = ContentUris.withAppendedId(uri, rowId);
@@ -351,7 +370,92 @@ public class RapidSmsContentProvider extends ContentProvider {
 
 		return doInsert(uri, values, RapidSmsDBConstants.Message.TABLE, RapidSmsDBConstants.Message.MESSAGE);
 	}
+	
+	
+	/**
+	 * @param uri
+	 * @param values
+	 */
+	private Uri insertSurvey(Uri uri, ContentValues values) {
+		Long now = Long.valueOf(System.currentTimeMillis());
 
+		// Make sure that the fields are all set
+		if (values.containsKey(RapidSmsDBConstants.Message.TIME) == false) {
+			values.put(RapidSmsDBConstants.Message.TIME, now);
+		}
+/*
+		if (values.containsKey(RapidSmsDBConstants.Message.MESSAGE) == false) {
+			throw new SQLException("No message");
+		}
+
+		if (values.containsKey(RapidSmsDBConstants.Message.MONITOR) == false) {
+			throw new SQLException("Must set a monitor for insertion");
+		}
+		// else {
+		// //check if the monitor exists.
+		// Cursor monitorCursor = query(RapidSmsDBConstants.Monitor.CONTENT_URI,
+		// null, "phone='" +
+		// values.getAsString(RapidSmsDBConstants.Message.PHONE) + "'" , null,
+		// null);
+		// if(monitorCursor.getCount() == 0) {
+		// ContentValues monitorValues = new ContentValues();
+		// monitorValues.put(RapidSmsDBConstants.Message.MESSAGE, values
+		// .getAsString(RapidSmsDBConstants.Message.MESSAGE));
+		// Uri monitorUri =
+		// insertMonitor(RapidSmsDBConstants.Monitor.CONTENT_URI,
+		// monitorValues);
+		// // ok, so we insert the mMonitorString into the mMonitorString table.
+		// // get the URI back and assign the foreign key into the values as
+		// // part of the message insert
+		// values.put(RapidSmsDBConstants.Message.MONITOR, monitorUri
+		// .getPathSegments().get(1));
+		// values.remove(RapidSmsDBConstants.Message.PHONE);
+		// }
+		//			
+		//			
+		// }
+
+		if (values.containsKey(RapidSmsDBConstants.Message.IS_OUTGOING) == false) {
+			throw new SQLException("No direction");
+		}
+
+		if (values.containsKey(RapidSmsDBConstants.Message.IS_VIRTUAL) == false) {
+			values.put(RapidSmsDBConstants.Message.IS_VIRTUAL, false);
+		}
+*/
+		// TOD remove the hardcoding of nullhack keyword
+		return doInsert(uri, values, RapidSmsDBConstants.Survey.TABLE, "surveyname");
+	}
+	
+	
+
+	private Uri insertProject(Uri uri, ContentValues values) {
+		Long now = Long.valueOf(System.currentTimeMillis());
+
+		// Make sure that the fields are all set
+		if (values.containsKey(RapidSmsDBConstants.Message.TIME) == false) {
+			values.put(RapidSmsDBConstants.Message.TIME, now);
+		}
+
+		// TODO these are all hard coded, should put them in constants file
+		if (!values.containsKey("name")) {
+			throw new SQLException("No message");
+		}
+		// TODO what is this monitor?
+/*
+		if (values.containsKey(RapidSmsDBConstants.Message.MONITOR) == false) {
+			throw new SQLException("Must set a monitor for insertion");
+		}
+*/
+
+
+		if (!values.containsKey("is_active")) {
+			values.put("is_active", true);
+		}
+
+		return doInsert(uri, values, RapidSmsDBConstants.Project.TABLE, "name");
+	}
+	
 	/**
 	 * @param uri
 	 * @param values
@@ -413,6 +517,14 @@ public class RapidSmsContentProvider extends ContentProvider {
 				table = RapidSmsDBConstants.Message.TABLE;
 				break;
 
+			case PROJECT:
+				table = RapidSmsDBConstants.Project.TABLE;
+				break;
+				
+			case SURVEY:
+				table = RapidSmsDBConstants.Survey.TABLE;
+				break;
+				
 			case MESSAGE_ID:
 				table = RapidSmsDBConstants.Message.TABLE;
 				finalWhere = BaseColumns._ID + "=" + uri.getPathSegments().get(1)
@@ -442,7 +554,7 @@ public class RapidSmsContentProvider extends ContentProvider {
 				// and appending that to do the qb.setTables
 				String formid = uri.getPathSegments().get(1);
 				Form f = ModelTranslator.getFormById(Integer.valueOf(formid).intValue());
-				table = RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix();
+				table = RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix().replace("@", "");
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
@@ -474,6 +586,24 @@ public class RapidSmsContentProvider extends ContentProvider {
 				qb.setTables(RapidSmsDBConstants.Message.TABLE);
 				break;
 
+			case PROJECT:
+				qb.setTables(RapidSmsDBConstants.Project.TABLE);
+				break;
+			
+			case SURVEY:
+				Log.i("ContentProvider.query", "selection: \"" + selection + "\"");
+				qb.setTables(RapidSmsDBConstants.Survey.TABLE);
+				/*SQLiteDatabase db1 = mOpenHelper.getReadableDatabase();
+				Cursor c_all = qb.query(db1, null, null, null, null, null, null);
+				c_all.moveToFirst();
+				for (int i = 1; i < c_all.getCount(); i++) {
+					Log.i("ContentProvider.query", "Survey name: \"" + c_all.getString(c_all.getColumnIndex("surveyname")) + "\"");
+					c_all.moveToNext();
+				}
+				*/
+				break;
+				
+				
 			case MESSAGE_ID:
 				qb.setTables(RapidSmsDBConstants.Message.TABLE);
 				qb.appendWhere(BaseColumns._ID + "=" + uri.getPathSegments().get(1));
@@ -521,10 +651,10 @@ public class RapidSmsContentProvider extends ContentProvider {
 				Form f = ModelTranslator.getFormById(Integer.valueOf(formid).intValue());
 				StringBuilder query = new StringBuilder();
 				query.append("select " + RapidSmsDBConstants.FormData.TABLE_PREFIX);
-				query.append(f.getPrefix() + ".*");
-				query.append(" from " + RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix());
+				query.append(f.getPrefix().replace("@", "") + ".*");
+				query.append(" from " + RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix().replace("@", ""));
 				query.append(" join rapidandroid_message on (");
-				query.append(RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix());
+				query.append(RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix().replace("@", ""));
 				query.append(".message_id = rapidandroid_message._id");
 				query.append(") ");
 
@@ -557,8 +687,17 @@ public class RapidSmsContentProvider extends ContentProvider {
 		// }
 
 		// Get the database and run the query
+		Log.i("getting database", "");
 		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+		
+		Log.i("doing query", "");
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
+		/*if (c == null) {
+			Log.i("ContentProvider.query", "results null!");
+		} else if (c.getCount() == 0) {
+			Log.i("ContentProvider.query", "results empty!");
+		}*/
+		
 		// Tell the cursor what uri to watch, so it knows when its source data
 		// changes
 		c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -584,7 +723,19 @@ public class RapidSmsContentProvider extends ContentProvider {
 			case MESSAGE:
 				table = RapidSmsDBConstants.Message.TABLE;
 				break;
+				
+			case PROJECT:
+				table = RapidSmsDBConstants.Project.TABLE;
+				break;
+				
+			case SURVEY:
+				table = RapidSmsDBConstants.Survey.TABLE;
+				break;
 
+			case FORM:
+				table = RapidSmsDBConstants.Form.TABLE;
+				break;
+				
 			case MESSAGE_ID:
 				table = RapidSmsDBConstants.Message.TABLE;
 				/*finalWhere = BaseColumns._ID + "=" + uri.getPathSegments().get(1)
@@ -614,13 +765,14 @@ public class RapidSmsContentProvider extends ContentProvider {
 				// and appending that to do the qb.setTables
 				String formid = uri.getPathSegments().get(1);
 				Form f = ModelTranslator.getFormById(Integer.valueOf(formid).intValue());
-				table = RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix();
+				table = RapidSmsDBConstants.FormData.TABLE_PREFIX + f.getPrefix().replace("@", "");
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 		
 		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+		Log.i("RapidSmsContentProvider", "update: selection " + selection);
 		return db.update(table, valuesToChange, selection, selectionArgs);
 	}
 

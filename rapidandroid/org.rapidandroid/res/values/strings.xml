@@ -53,4 +53,21 @@
 <string name="glb_chk_parse_text">Reply on successful parses</string>
 <string name="glbsettings_heading">Global reply settings</string>
 <string name="glb_lbl_activeall">Activate all SMS features</string>
+<string name="button_createsurvey">New Survey</string>
+<string name="button_viewresponses">See Responses</string>
+<string name="button_createProject">New Project</string>
+<string name="button_saveProject">Next</string>
+<string name="project_name_hint">Project Name</string>
+<string name="project_id_hint">Project ID</string>
+<string name="project_location_hint">Project Location</string>
+<string name="project_description_hint">Project Description</string>
+<string name="button_scoping">Scoping Phase</string>
+<string name="button_project">Project Phase</string>
+<string name="button_analysis">Analysis Phase</string>
+<string name="button_choosePhase">Next</string>
+<string name="button_createSurvey">Next</string>
+<string name="please_name_survey">Create a new survey:</string>
+<string name="survey_name_hint">Survey Name</string>
+<string name="survey_description_hint">Description</string>
+<string name="survey_location_hint">Location</string>
 </resources>

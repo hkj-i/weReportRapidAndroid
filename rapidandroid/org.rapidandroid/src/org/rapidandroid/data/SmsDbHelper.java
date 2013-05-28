@@ -106,6 +106,28 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 				+ "\"form_uri\" varchar(512) NULL," // TODO look up max chars for URI
 				+ "\"receive_time\" datetime NULL);";
 
+		String mCreateTable_Project = "CREATE TABLE \"rapidandroid_project\" ("
+				+ "\"_id\" integer NOT NULL PRIMARY KEY,"
+				// +
+				// "\"transaction_id\" integer NULL REFERENCES \"rapidandroid_transaction\" (\"id\"),"
+				+ "\"name\" varchar(512) NOT NULL,"
+				+ "\"number\" varchar(512) NULL,"
+				+ "\"time\" datetime NOT NULL," 
+				+ "\"is_active\" bool NOT NULL," 
+				+ "\"location\" varchar(512) NULL,"
+				+ "\"description\" varchar(512) NULL);";
+		
+		String mCreateTable_Survey = "CREATE TABLE \"rapidandroid_survey\" ("
+				+ "\"_id\" integer NOT NULL PRIMARY KEY,"
+				// +
+				// "\"transaction_id\" integer NULL REFERENCES \"rapidandroid_transaction\" (\"id\"),"
+				+ "\"surveyname\" varchar(512) NOT NULL,"
+				+ "\"time\" datetime NOT NULL," 
+				+ "\"project_id\" varchar(512) NULL,"
+				+ "\"location\" varchar(512) NOT NULL,"
+				+ "\"phase\" integer NOT NULL,"
+				+ "\"description\" varchar(1028) NULL);";
+		
 		String mCreateTable_Monitor = "CREATE TABLE \"rapidandroid_monitor\" ("
 				+ "\"_id\" integer NOT NULL PRIMARY KEY," + "\"first_name\" varchar(50) NOT NULL,"
 				+ "\"last_name\" varchar(50) NOT NULL," + "\"alias\" varchar(16) NOT NULL UNIQUE,"
@@ -115,7 +137,9 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 		String mCreateTable_Form = "CREATE TABLE \"rapidandroid_form\" (" + "\"_id\" integer NOT NULL PRIMARY KEY,"
 				+ "\"formname\" varchar(32) NOT NULL UNIQUE," + "\"prefix\" varchar(16) NOT NULL UNIQUE,"
 				+ "\"description\" varchar(512) NOT NULL," 
-				+ "\"parsemethod\" varchar(128) NOT NULL);";
+				+ "\"parsemethod\" varchar(128) NOT NULL," 
+				+ "\"survey_id\" integer unsigned NULL,"
+				+ "\"sequence\" integer unsigned NULL);";
 
 		String mCreateTable_FieldType = "CREATE TABLE \"rapidandroid_fieldtype\" ("
 				+ "\"_id\" integer NOT NULL PRIMARY KEY," + "\"name\" varchar(32) NOT NULL UNIQUE,"
@@ -125,7 +149,7 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 				+ "\"form_id\" integer NOT NULL REFERENCES \"rapidandroid_form\" (\"id\"),"
 				+ "\"sequence\" integer unsigned NOT NULL," 
 				+ "\"name\" varchar(32) NOT NULL,"
-				+ "\"prompt\" varchar(64) NOT NULL,"
+				+ "\"prompt\" varchar(1028) NOT NULL,"
 				+ "\"fieldtype_id\" integer NOT NULL REFERENCES \"rapidandroid_fieldtype\" (\"id\"));";
 
 		// String mCreateTable_Transaction =
@@ -137,6 +161,8 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 		// "\"monitor_id\" integer NULL REFERENCES \"rapidandroid_monitor\" (\"id\"));";
 
 		db.execSQL(mCreateTable_Message);
+		db.execSQL(mCreateTable_Project);
+		db.execSQL(mCreateTable_Survey);
 		db.execSQL(mCreateTable_Monitor);
 		db.execSQL(mCreateTable_Form);
 		db.execSQL(mCreateTable_FieldType);
