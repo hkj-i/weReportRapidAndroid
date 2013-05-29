@@ -20,7 +20,9 @@ import android.util.Log;
 import android.util.Pair;
 
 public class XMLTranslator {
-
+	// hee
+	private static String PROJECT_NAME = "capstone_report";
+	
 	private static String[] prefixes = null;
 	private static Form[] forms = null;
 
@@ -38,7 +40,7 @@ public class XMLTranslator {
 	// Also in SMSReceiver so the message actually reaches here
 	// Currently, this should never return null, since we only
 	// grab text messages with prefixes we exactly recognize.
-	private Form determineForm(String message) {
+	public Form determineForm(String message) {
 		int len = prefixes.length;
 		for (int i = 0; i < len; i++) {
 			String prefix = prefixes[i];
@@ -55,9 +57,7 @@ public class XMLTranslator {
 	public void buildOpenRosaXform(Context context, int msgid, Form f) throws RemoteException {
 		
 		String XML = "";
-		Integer wellFormed = 1;
-		
-		
+		Integer wellFormed = 1;		
 		// In order to construct an XML from a text message, we need:
 		//		- Survey ID from Aggregate
 		//		- instanceID
@@ -66,54 +66,6 @@ public class XMLTranslator {
 		//  We'll query the database for already-parsed fields...
 		//  not doing anything with them yet.  Not sure where field names are stored,
 		//  in the form???
-
-	/*	Cursor row = context.getContentResolver().query(Uri.parse(RapidSmsDBConstants.FormData.CONTENT_URI_PREFIX + f.getFormId()),
-											null,
-											"message_id = " + msgid,
-											null,
-											null);
-		row.moveToFirst();
-		if (row == null) {
-			Log.e("DatabaseQuery", "Query results NULL");
-		}
-		if (row.getColumnCount() == 0) {
-			Log.e("DatabaseQuery", "Query results empty");
-		}
-		for (int i = 0; i < row.getColumnCount(); i++) {
-			Log.i("DatabaseQuery", "Column " + i + " " + row.getString(i));
-		}
-		
-		*/
-		/*
-		// Required Header
-		XML += "<?xml version=\'1.0\' ?>";
-		
-		// TODO this is hardcoding one specific survey
-		//xmlString += "<data id=\"build_Texts_1367305507\">";
-		XML += "<data id=\"" + processSpecialCharacters(f.getFormName()) + "\">";
-		
-		XML += "<meta>";
-		
-		// TODO need to generate this
-		XML += "<instanceID>uuid:" + msgid + "</instanceID>";
-		XML += "</meta>";
-		
-		// TODO need to generate another uuid for the sender so we don't actually
-		// send up the real number.  Also, can we quarantee this won't have special
-		// characters?
-		XML += "<sender>" + sender + "</sender>";
-		XML += "<message>" + processSpecialCharacters(msgBody) + "</message>";
-		
-		// Process the message here.
-		Field[] fields = f.getFields();
-		
-		
-		
-		
-		
-		XML += "</data>";
-			*/
-		
 		Cursor messageRow = context.getContentResolver().query(RapidSmsDBConstants.Message.CONTENT_URI, 
 																null, 
 																"_id = " + msgid, 
@@ -131,8 +83,6 @@ public class XMLTranslator {
 																			"form_id = " + f.getFormId(),
 																			null,
 																			null);
-		
-		
 		messageRow.moveToFirst();
 		parsedDataRow.moveToFirst();
 		parsedDataFieldNamesRows.moveToFirst();
@@ -143,21 +93,37 @@ public class XMLTranslator {
 		if (messageRow.getColumnCount() == 0) {
 			Log.e("DatabaseQuery", "messageRow empty");
 		}
+		
+		Log.i("message row column count:", messageRow.getColumnCount() + "");
 		for (int i = 0; i < messageRow.getColumnCount(); i++) {
-			Log.i("DatabaseQuery", "Column " + i + " " + messageRow.getString(i));
+			Log.i("DatabaseQuery - get column count", "Column " + i + " " + messageRow.getString(i));
 		}
 		
 		if (parsedDataRow == null) {
 			Log.e("DatabaseQuery", "parsedDataRow NULL");
 		}
+		
+		Log.i("DatabaseQuery", "parsedDataRow not NULL");
+		
 		if (parsedDataRow.getColumnCount() == 0) {
-			Log.e("DatabaseQuery", "parsedDataRow empty");
+			Log.i("DatabaseQuery", "parsedDataRow empty");
 		}
+		
+		Log.i("DatabaseQuery", "parsedDataRow not empty");
+		
 		String[] columnNames = parsedDataRow.getColumnNames();
+		
+		Log.i("DatabaseQuery", "got columnNames");
+	
+		
+		Log.i("DatabaseQuery", "got columnCount which is " + parsedDataRow.getColumnCount());;
+		
 		for (int i = 0; i < parsedDataRow.getColumnCount(); i++) {
 			Log.i("DatabaseQuery", "Column " + i + " " + parsedDataRow.getString(i));
 			Log.i("DatabaseQuery", "Column name " + columnNames[i]);
 		}
+		
+		Log.i("DatabaseQuery", "printed datarow column count");
 		
 		if (parsedDataFieldNamesRows == null) {
 			Log.e("DatabaseQuery", "messageRow NULL");
@@ -167,15 +133,19 @@ public class XMLTranslator {
 		}
 		
 		for (int i = 0; i < parsedDataFieldNamesRows.getColumnCount(); i++) {
-			Log.i("DatabaseQuery", "Column " + i + " " + parsedDataFieldNamesRows.getString(i));
+			Log.i("DatabaseQuery - parse Data Field Names", "Column " + i + " " + parsedDataFieldNamesRows.getString(i));
 		}
 		
+		Log.i("DatabaseQuery - parse Data Field Names", "finished parsing");
 		Field[] fields = f.getFields();
+		Log.i("XML Translator", "fields is not null");
 		
 		// generate xml string
 		XML += "<?xml version=\'1.0\' ?>";
 		String processedFormName = processSpecialCharacters(f.getFormName());
-		XML += "<" + processedFormName + " id=\"" + processedFormName + "\">";
+		//hee
+		//XML += "<data " +" id=\"" + processedFormName + "\">";
+		XML += "<data " +" id=\"" + PROJECT_NAME + "\">";
 		XML += "<meta>";
 		
 		// TODO need to generate this
@@ -184,19 +154,98 @@ public class XMLTranslator {
 		
 		XML += "<rawtext>" + processSpecialCharacters(messageRow.getString(messageRow.getColumnIndex("message"))) + "</rawtext>";
 		
+		// for producing the instance file
+		int text = 1;
+		int num = 1;
+		int select = 1;
+		int countm = 1;
+		
 		for (int i = 0; i < columnNames.length; i++) {
+			
 			if (columnNames[i].startsWith("col_")) {
+				String parsedfield = parsedDataRow.getString(i);
+				
+				// grab the fieldtype id corresponding to the sequence
+				
+				parsedDataFieldNamesRows = context.getContentResolver().query(RapidSmsDBConstants.Field.CONTENT_URI,
+						null,
+						"form_id = " + f.getFormId() + " AND " + "sequence = " + countm,
+						null,
+						null);
+				parsedDataFieldNamesRows.moveToFirst();
+				
+				String ftype_id = parsedDataFieldNamesRows.getString(parsedDataFieldNamesRows.getColumnIndex("fieldtype_id"));
+				Cursor datatyperow = context.getContentResolver().query(RapidSmsDBConstants.FieldType.CONTENT_URI,
+						null,
+						"_id = " + ftype_id,
+						null,
+						null);
+				
+				datatyperow.moveToFirst();
+				
+				// according to the type, choose num or select or text
+				String type =  datatyperow.getString(datatyperow.getColumnIndex("datatype"));
+				if (type.equals("word")) {
+					XML += "<" + "text" + text +">" + parsedfield + "</" + "text" + text +">";		
+					text++;
+				} else if (type.equals("boolean")) {
+					// yes no
+					if (parsedfield.toLowerCase().equals("true")) {
+						XML += "<" + "select" + select +">" + "Yes" + "</" + "select" + select +">";
+					} else {
+						XML += "<" + "select" + select +">" + "No" + "</" + "select" + select +">";
+					}
+					select++;
+				} else {
+					// number
+					XML += "<" + "num" + num +">" + parsedfield + "</" + "num" + num +">";
+					num++;
+				}
+				countm++;
+				
+				// save the xml
+				/*
+				
 				String fieldName = columnNames[i].substring(4);
-				XML += "<" + fieldName + ">" + parsedDataRow.getString(i) + "</" + fieldName + ">";
+				//XML += "<" + fieldName + ">" + parsedDataRow.getString(i) + "</" + fieldName + ">";
+				XML += "<text" + countm + ">" + parsedDataRow.getString(i) + "</text" + countm + ">";
 				
 				// If any of the fields aren't filled in, it's a malformed response
 				if (parsedDataRow.getString(i) == null) {
 					Log.i("DatabaseQuery", "XML malformed: field " + fieldName + " null");
 					wellFormed = 0;
 				}
+				
+				*/
 			}
 		}
 		
+		// fill out the rest
+		for(int i=1; i <= 5; i++) {
+			if (text == i) {
+				XML +=	"<text" + text + " />";
+				text++;
+			}
+			
+			if (num == i) {
+				XML +=	"<num" + num + " />";
+				num++;
+			}
+			
+			if (select == i) {
+				XML +=	"<select" + select + " />";
+				select++;
+			}
+		
+		}
+		
+		// now get the form name
+		String official_formname = processedFormName.replace(" ", "_");
+		
+		
+		XML += "<volunteer_name /><survey_name>" + official_formname  +"</survey_name><phone_number />";
+				
+				
 		for (int i = 0; i < f.getFields().length; i++) {
 			Log.i("DatabaseQuery", "Field " + i + ": " + f.getFields()[i].getName());
 		}
@@ -211,7 +260,7 @@ public class XMLTranslator {
 			Log.i("DatabaseQuery", "XML malformed: number of fields in response " + messageRow.getString(messageRow.getColumnIndex("message")).split(" ").length + ", number of fields expected " + f.getFields().length);
 			wellFormed = 0;
 		}
-		XML += "</" + processedFormName + ">";
+		XML += "</data>";
 		
 		Log.i("DatabaseQuery", "XML string: " + XML);
 		
@@ -256,7 +305,6 @@ public class XMLTranslator {
 			fw.write(XML);
 			fw.flush();
 			fw.close();
-
 		} catch (IOException e) {
 			Log.e("SaveXml","Error writing XML file");
 			e.printStackTrace();
@@ -267,12 +315,20 @@ public class XMLTranslator {
 		
 		ContentResolver resolver = context.getContentResolver();
 	     ContentValues values = new ContentValues();
-	     values.put("displayName", f.getFormName() + " " + msgid); // make your own display name~
+	     values.put("displayName", processedFormName); // make your own display name~
 	     values.put("status", "incomplete"); // you can mark it as complete
 	     values.put("canEditWhenComplete", Boolean.toString(true));
 	     values.put("instanceFilePath", 
 	    		 newFolder + "/" + instanceName + ".xml"); // file path
-	     values.put("jrFormId", f.getFormName()); // the form id; the form I used happened to have id = "st2"
+	     values.put("jrFormId", PROJECT_NAME); // the form id; the form I used happened to have id = "st2"
+	     values.put("submissionUri", "https://capstone-wereport.appspot.com/submission");
+	     // hee
+	     // jrFormName
+	     values.put("jrFormName", processedFormName);
+	     
+	     
+	     
+	     
 	     // only add the version if it exists (ie not null)
 	     // now we want to get the uri for the insertion.
 	     Uri uriOfForm = resolver.insert(
@@ -291,7 +347,7 @@ public class XMLTranslator {
 		// Update RapidAndroid DB with uri and well-formed
 		ContentResolver rapidResolver = context.getContentResolver();
 		ContentValues rapidValues = new ContentValues();
-		rapidValues.put("form_uri", (newFolder + "/" + rowId).toString());
+		rapidValues.put("form_uri", uriOfForm.toString());
 		rapidValues.put("is_sent", wellFormed);
 	     int colsChanged = rapidResolver.update(
 	    		 RapidSmsDBConstants.Message.CONTENT_URI,
@@ -314,8 +370,6 @@ public class XMLTranslator {
 			for (int i = 0; i < messageRow1.getColumnCount(); i++) {
 				Log.i("DatabaseQuery", "Column " + i + " " + messageRow1.getString(i));
 			}
-		
-
 	}
 	
 	private String processSpecialCharacters(String string) {
@@ -326,8 +380,4 @@ public class XMLTranslator {
 		string.replace("\"", "&quot");
 		return string;
 	}
-	
-	
-	
-	
 }

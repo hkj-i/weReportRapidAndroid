@@ -57,6 +57,7 @@
 </receiver>
 <activity android:name=".activity.ChartData"></activity>
 <activity android:name=".activity.ProjectChooser"></activity>
+<activity android:name=".activity.SurveySent"></activity>
 <activity android:name=".activity.PhaseChooser"></activity>
 <activity android:name=".activity.CreateProject"></activity>
 <activity android:name=".activity.SurveyCreator"></activity>

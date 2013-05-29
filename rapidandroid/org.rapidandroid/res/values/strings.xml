@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Hello World, rapidandroid</string>
-    <string name="app_name">RapidAndroid</string>
+    <string name="app_name">weReport</string>
 <string name="lbl_formname">Name</string>
 <string name="lbl_description">Description</string>
 <string name="lbl_formprefix">Prefix</string>

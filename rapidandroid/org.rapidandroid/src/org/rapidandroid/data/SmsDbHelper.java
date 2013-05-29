@@ -139,7 +139,8 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 				+ "\"description\" varchar(512) NOT NULL," 
 				+ "\"parsemethod\" varchar(128) NOT NULL," 
 				+ "\"survey_id\" integer unsigned NULL,"
-				+ "\"sequence\" integer unsigned NULL);";
+				+ "\"sequence\" integer unsigned NULL," +
+				"\"question_type\" integer unsigned NULL);";
 
 		String mCreateTable_FieldType = "CREATE TABLE \"rapidandroid_fieldtype\" ("
 				+ "\"_id\" integer NOT NULL PRIMARY KEY," + "\"name\" varchar(32) NOT NULL UNIQUE,"
