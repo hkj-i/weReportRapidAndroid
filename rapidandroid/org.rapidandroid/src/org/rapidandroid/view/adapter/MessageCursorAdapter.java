@@ -131,7 +131,7 @@ public class MessageCursorAdapter extends CursorAdapter {
 			txvDate.setText(Message.DisplayDateTimeFormat.format(timestamp));
 
 			Monitor m = MessageTranslator.GetMonitor(getContext(), monitorID);
-			txvFrom.setText(m.getPhone());
+			//txvFrom.setText(m.getPhone());
 
 			txvMessage.setText(message);
 		}
