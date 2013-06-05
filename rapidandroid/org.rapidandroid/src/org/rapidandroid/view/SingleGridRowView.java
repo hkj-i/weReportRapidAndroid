@@ -22,8 +22,6 @@ import java.util.Vector;
 import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils.TruncateAt;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -85,12 +83,9 @@ public class SingleGridRowView extends TableLayout {
 			// coldata.setBackgroundColor(Color.TRANSPARENT);
 
 			coldata.setPadding(0, 4, 0, 4);
-//nicole this isn't doing anything...... !!!
-			LinearLayout ll = new LinearLayout(getContext());
-			ll.addView(coldata);
-			ll.addView(new CheckBox(getContext()));
-			//mDataCols.add(coldata);
-			mRow.addView(ll, i);
+
+			mDataCols.add(coldata);
+			mRow.addView(coldata, i);
 		}
 
 		// mRow.setWeightSum(mColCount);

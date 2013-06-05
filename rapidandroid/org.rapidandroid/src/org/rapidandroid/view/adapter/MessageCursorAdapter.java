@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -54,6 +55,7 @@ public class MessageCursorAdapter extends CursorAdapter {
 			boolean isoutgoing = Boolean.parseBoolean(cursor.getString(4));
 			Date hackDate = new Date();
 			boolean success = false;
+			int isProcessed = cursor.getInt(cursor.getColumnIndex("is_sent"));
 			try {
 				hackDate = Message.SQLDateFormatter.parse(timestamp);
 				success = true;
@@ -62,7 +64,7 @@ public class MessageCursorAdapter extends CursorAdapter {
 			}
 
 			SimpleMessageView srv = (SimpleMessageView) view;
-			srv.setData(message, hackDate, MonitorID, isoutgoing);
+			srv.setData(message, hackDate, MonitorID, isoutgoing, isProcessed);
 		}
 
 	}
@@ -81,7 +83,9 @@ public class MessageCursorAdapter extends CursorAdapter {
 		boolean isoutgoing = Boolean.parseBoolean(cursor.getString(4));
 		Date hackDate = new Date();
 
-		SimpleMessageView srv = new SimpleMessageView(context, message, hackDate, MonitorID, isoutgoing);
+		int isProcessed = cursor.getInt(cursor.getColumnIndex("is_sent"));
+		
+		SimpleMessageView srv = new SimpleMessageView(context, message, hackDate, MonitorID, isoutgoing, isProcessed);
 		return srv;
 	}
 
@@ -91,8 +95,9 @@ public class MessageCursorAdapter extends CursorAdapter {
 		private TextView txvDate;
 		private TextView txvFrom;
 		private TextView txvMessage;
-
-		public SimpleMessageView(Context context, String message, Date timestamp, int monitorID, boolean isOutgoing) {
+		private CheckBox txvProcessed;
+		
+		public SimpleMessageView(Context context, String message, Date timestamp, int monitorID, boolean isOutgoing, int isProcessed) {
 			super(context);
 			mHeaderRow = new TableRow(context);
 
@@ -105,11 +110,15 @@ public class MessageCursorAdapter extends CursorAdapter {
 			txvFrom.setPadding(3, 3, 8, 3);
 			txvFrom.setGravity(Gravity.RIGHT);
 
+			txvProcessed = new CheckBox(context);
+			txvProcessed.setGravity(Gravity.RIGHT);
+			//txvProcessed.setOnClickListener("return false");
+			
 			// this.addView(txvHeader, new
 			// LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
 			// LayoutParams.WRAP_CONTENT));
 			mHeaderRow.addView(txvDate);
-			mHeaderRow.addView(txvFrom);
+			mHeaderRow.addView(txvProcessed);
 			addView(mHeaderRow);
 
 			txvMessage = new TextView(context);
@@ -123,13 +132,19 @@ public class MessageCursorAdapter extends CursorAdapter {
 			this.setColumnStretchable(0, true);
 			this.setColumnStretchable(1, true);
 
-			setData(message, timestamp, monitorID, isOutgoing);
+			setData(message, timestamp, monitorID, isOutgoing, isProcessed);
 			// TODO Auto-generated constructor stub
 		}
 
-		public void setData(String message, Date timestamp, int monitorID, boolean isOutgoing) {
+		public void setData(String message, Date timestamp, int monitorID, boolean isOutgoing, int isProcessed) {
 			txvDate.setText(Message.DisplayDateTimeFormat.format(timestamp));
 
+			if (isProcessed == 0) {
+				txvProcessed.setChecked(false);
+			} else {
+				txvProcessed.setChecked(true);
+			}
+			
 			Monitor m = MessageTranslator.GetMonitor(getContext(), monitorID);
 			//txvFrom.setText(m.getPhone());
 
