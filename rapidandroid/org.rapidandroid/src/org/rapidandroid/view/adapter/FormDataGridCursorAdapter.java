@@ -48,7 +48,6 @@ public class FormDataGridCursorAdapter extends CursorAdapter {
 		mContext = context;
 		mWidth = screenWidth;
 		mColWidth = screenWidth / (c.getColumnCount() - 5);
-
 	}
 
 	/*
@@ -63,7 +62,6 @@ public class FormDataGridCursorAdapter extends CursorAdapter {
 			SingleGridRowView srv = (SingleGridRowView) view;
 			srv.setData(cursor);
 		}
-
 	}
 
 	/*

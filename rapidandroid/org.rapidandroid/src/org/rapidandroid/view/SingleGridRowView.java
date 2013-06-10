@@ -25,6 +25,9 @@ import android.text.TextUtils.TruncateAt;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+// nicole
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 
 /**
  * @author Daniel Myung dmyung@dimagi.com
@@ -83,9 +86,12 @@ public class SingleGridRowView extends TableLayout {
 			// coldata.setBackgroundColor(Color.TRANSPARENT);
 
 			coldata.setPadding(0, 4, 0, 4);
-
+			
+			
 			mDataCols.add(coldata);
 			mRow.addView(coldata, i);
+			
+			//
 		}
 
 		// mRow.setWeightSum(mColCount);

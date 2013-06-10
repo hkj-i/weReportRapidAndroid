@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_width="fill_parent" android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true">
+
     <Spinner
 	    android:id="@+id/projects_spinner"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content" />
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_createProject" 
-        android:onClick="createProject"/>
-   <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_choosePhase" 
-        android:onClick="choosePhase"/>
-</LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:paddingLeft="4.0dip"
+        android:paddingTop="5.0dip"
+        android:paddingRight="4.0dip"
+        android:paddingBottom="1.0dip"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_below="@+id/projects_spinner">
+
+        <Button
+            android:layout_width="0.0dip" android:layout_height="fill_parent"
+            android:text="@string/button_createProject" 
+            android:onClick="createProject"
+            android:layout_weight="1.0" />
+
+        <Button
+            android:layout_width="0.0dip" android:layout_height="fill_parent"
+            android:text="@string/button_choosePhase" 
+            android:onClick="choosePhase"
+            android:layout_weight="1.0" />
+
+    </LinearLayout>
+</RelativeLayout>

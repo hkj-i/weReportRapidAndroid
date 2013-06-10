@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
     android:orientation="vertical" >
+
     <Button
-
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:text="@string/button_scoping" 
-        android:onClick="scopingPhase"/>
+        android:layout_margin="20dp"
+        android:onClick="scopingPhase"
+        android:text="@string/button_scoping" />
+
    <Button
+       android:layout_width="140dp"
+       android:layout_height="wrap_content"
+       android:onClick="projectPhase"
+       android:layout_margin="20dp"
+       android:text="@string/button_project" />
 
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:text="@string/button_project" 
-        android:onClick="projectPhase"/>
    <Button
+       android:layout_width="140dp"
+       android:layout_height="wrap_content"
+       android:onClick="analysisPhase"
+       android:layout_margin="20dp"
+       android:text="@string/button_analysis" />
 
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:text="@string/button_analysis" 
-        android:onClick="analysisPhase"/>
 </LinearLayout>

@@ -34,12 +34,17 @@
 		<link>
 			<name>lib-src</name>
 			<type>2</type>
+			<location>/Users/nicoleford/Documents/Development/adt-bundle-mac-x86_64-20130219/eclipse/Eclipse.app/Contents/MacOS/D::/android_dev_environment/workspace/rapidandroid_n/rapidandroid/rapidjava/org.rapidsms.java/src</location>
+		</link>
+		<link>
+			<name>lib-src-2</name>
+			<type>2</type>
 			<location>/Users/nicoleford/Documents/android/org.rapidsms.java/src</location>
 		</link>
 		<link>
 			<name>library-src</name>
 			<type>2</type>
-			<location>/Users/nicoleford/Documents/Development/adt-bundle-mac-x86_64-20130219/eclipse/Eclipse.app/Contents/MacOS/D::/Users/nicoleford/rapidandroid/rapidjava/org.rapidsms.java/src</location>
+			<location>/Users/nicoleford/Documents/Development/adt-bundle-mac-x86_64-20130219/eclipse/Eclipse.app/Contents/MacOS/D::/Users/nicoleford/Documents/Development/adt-bundle-mac-x86_64-20130219/eclipse/Eclipse.app/Contents/MacOS/D::/Users/nicoleford/rapidandroid/rapidjava/org.rapidsms.java/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>

@@ -3,15 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical" >
+    
     <TextView
         android:text="@string/please_name_survey" 
         android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
+    
     <EditText
 	    android:id="@+id/survey_name"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="10dp"
+	    android:layout_marginTop="3dp"
+	    android:layout_marginBottom="3dp"
 	    android:hint="@string/survey_name_hint"
 	    android:inputType="text" />
 
@@ -19,6 +26,10 @@
 	    android:id="@+id/survey_location"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="10dp"
+	    android:layout_marginTop="3dp"
+	    android:layout_marginBottom="3dp"
 	    android:hint="@string/survey_location_hint"
 	    android:inputType="text" />
     
@@ -26,12 +37,17 @@
 	    android:id="@+id/survey_description"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginTop="3dp"
+	    android:layout_marginBottom="3dp"
+	    android:layout_marginRight="10dp"
 	    android:hint="@string/survey_description_hint"
 	    android:inputType="textCapSentences|textMultiLine" />
     
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
+        android:layout_margin="20dp"
         android:text="@string/button_createSurvey" 
         android:onClick="createSurvey"/>
 </LinearLayout>

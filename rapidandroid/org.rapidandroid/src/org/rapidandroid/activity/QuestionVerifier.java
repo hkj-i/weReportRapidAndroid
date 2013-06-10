@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.rapidandroid.data.RapidSmsDBConstants;
 import org.rapidandroid.data.SurveyCreationConstants;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
@@ -29,54 +30,55 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class QuestionVerifier extends Activity {
-	
+
 	ArrayList<String> phoneNumbers = null;
 	String[] mphoneNumbers = null;
 	ArrayList<String> mSelectedNumbers = null;
 	ArrayList<String> mTextMessages = null;
-	
-	
+
+
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		
+
+
 		mTextMessages = new ArrayList<String>();
-		
+
 		//Question[] questions = (Question[]) getIntent().getExtras().get("questions");
-		
+
 		ScrollView sv = new ScrollView(this);
 		LinearLayout ll = new LinearLayout(this);
 		ll.setOrientation(LinearLayout.VERTICAL);
-		
+
 		TextView verify = new TextView(this);
 		verify.setText("Are these the questions you wish to send?");
 		ll.addView(verify);
-		
+
 		ContentResolver resolver = getContentResolver();
 		Cursor questions = resolver.query(RapidSmsDBConstants.Form.CONTENT_URI, 
 				null, "survey_id = " + getIntent().getExtras().getInt("survey_id"), 
 				null, null);
-		
+
 		questions.moveToFirst();
 		for (int i = 1; i < questions.getCount(); i++) {
 			TextView question = new TextView(this);
 			question.append(i + ". " + questions.getString(questions.getColumnIndex("description")));
-			
-		
+
+
 			ll.addView(question);
 			questions.moveToNext();
 		}
 		TextView question = new TextView(this);
 		question.append(questions.getCount() + ". " + questions.getString(questions.getColumnIndex("description")));
-		
-	
+
+
 		ll.addView(question);
-		
-		
+
+
 		phoneNumbers = new ArrayList<String>();
-		
-		
+
+
 		Button contactsButton = new Button(this);
 		contactsButton.setText("Choose Contacts");
 		contactsButton.setOnClickListener(new OnClickListener() {
@@ -84,7 +86,7 @@ public class QuestionVerifier extends Activity {
 			@Override
 			public void onClick(View v) {
 				Log.i("OnClick_loadContact", "clicked contactListener");
-				
+
 				// place to store the items
 				mSelectedNumbers = new ArrayList<String>();
 		        new AlertDialog.Builder(QuestionVerifier.this)
@@ -115,12 +117,12 @@ public class QuestionVerifier extends Activity {
 		            }
 		         })
 		         .show();
-				
+
 			}
-			
+
 		});
 		ll.addView(contactsButton);
-		
+
 		Button sendButton = new Button(this);
 		sendButton.setText("Send");
 		sendButton.setOnClickListener(new OnClickListener() {
@@ -131,21 +133,21 @@ public class QuestionVerifier extends Activity {
 				Cursor questions = resolver.query(RapidSmsDBConstants.Form.CONTENT_URI, 
 						null, "survey_id = " + getIntent().getExtras().getInt("survey_id"), 
 						null, null);
-				
-				
+
+
 				questions.moveToFirst();
-				
+
 				while (!questions.isAfterLast()) {
-					
+
 					 // Send message
 					mTextMessages.add(questions.getString(questions.getColumnIndex("description")).replace("\"", "\\\""));
-					
+
 					String surveyName = questions.getString(questions.getColumnIndex("formname"));
-					
+
 					Cursor answers = resolver.query(RapidSmsDBConstants.Field.CONTENT_URI, 
 							null, "form_id = " + questions.getInt(questions.getColumnIndex("_id")), 
 							null, null);
-					
+
 					answers.moveToFirst();
 					String prompt = answers.getString(answers.getColumnIndex("prompt"));
 					String fields = "";	
@@ -156,7 +158,7 @@ public class QuestionVerifier extends Activity {
 						String[] labels = {"Yes", "No"};
 						fields += SurveyCreationConstants.xForm.getSelectFieldXml(1, prompt, labels);
 					}
-					
+
 					String[] selectionArgs = {surveyName};
 					Cursor formResult = resolver.query(Uri.parse("content://org.odk.collect.android.provider.odk.forms/forms"), 
 							null, 
@@ -193,7 +195,7 @@ public class QuestionVerifier extends Activity {
 						if (!mExternalStorageAvailable) {
 							Log.e("SaveXml","External storage not available");
 						}
-						
+
 						File externalStorageDir = Environment.getExternalStorageDirectory();
 						try {
 							// String filename = path + File.separator +
@@ -209,30 +211,30 @@ public class QuestionVerifier extends Activity {
 							Log.e("SaveXml","Error writing XML file");
 							e.printStackTrace();
 						}
-						
+
 						// And insert into ODK Collect DB
 						ContentValues cv = new ContentValues();
 						cv.put("displayName", surveyName);
 						cv.put("jrFormId", "capstone_report");
-						
+
 						cv.put("formFilePath", externalStorageDir.getAbsoluteFile() + 
 								"/odk/forms/" + surveyName.replace(" ", "_") + ".xml");
 						cv.put("submissionUri", "https://capstone-wereport.appspot.com/submission");
-						
+
 						resolver.insert(Uri.parse("content://org.odk.collect.android.provider.odk.forms/forms"), 
 								cv);
-					
+
 					}
-					
-					
-					
+
+
+
 				    questions.moveToNext();
-					
+
 				}
-				
-			
-			
-				
+
+
+
+
 				//---sends an SMS message to another device---
 				// parse through all contacts list and send SMS
 				if (mSelectedNumbers != null) {
@@ -252,20 +254,20 @@ public class QuestionVerifier extends Activity {
 						  }	    
 					}
 				}
-				
-				
+
+
 				Intent intent = new Intent(QuestionVerifier.this, SurveySent.class);
 				startActivity(intent);
 			}
-		
+
 		});
 
-		
-		
+
+
 		// get phone numbers and add them
 		Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
-		
-		
+
+
 		while (phones.moveToNext())
 		{
 		  // may be duplicated if a name has multiple numbers
@@ -273,27 +275,27 @@ public class QuestionVerifier extends Activity {
 		  String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 		  phoneNumbers.add(phoneNumber);
 		}
-		
+
 		phones.close();
-		
+
 		// make it into an array
 		mphoneNumbers = new String[phoneNumbers.size()];
 		for (int i = 0; i < phoneNumbers.size(); i++) {
 			mphoneNumbers[i] = phoneNumbers.get(i);
 			Log.i("phone number", mphoneNumbers[i]);
 		}
-		
+
 		Log.i("number of phonenumbers: ", "total: " + mphoneNumbers.length);
-		
+
 		ll.addView(sendButton);
 		sv.addView(ll);
 		setContentView(sv);
 	}
-	
-	
+
+
 	public void onClick_loadContact(View v) {
 		Log.i("OnClick_loadContact", "clicked contactListener");
-		
+
 		// place to store the items
 		mSelectedNumbers = new ArrayList<String>();
         new AlertDialog.Builder(this)
@@ -325,7 +327,7 @@ public class QuestionVerifier extends Activity {
          })
          .show();
 	}
-	
+
  
 	/*
 	@Override
@@ -336,6 +338,6 @@ public class QuestionVerifier extends Activity {
 	}
 	*/
 
-	
-	
+
+
 }

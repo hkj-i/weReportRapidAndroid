@@ -40,8 +40,8 @@ public class SurveyCreator extends Activity {
 		String projectName = (String) getIntent().getExtras().get("project_name");
 		Log.i("SurveyCreator", "getting project name " + projectName);
 		
+		
 		if (!projectName.equals("No Project ID")) {
-			
 			
 			cv.put("project_id", "\'" + projectName + "\'");
 			 

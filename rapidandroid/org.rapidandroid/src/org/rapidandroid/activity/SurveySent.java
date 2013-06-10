@@ -10,17 +10,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class SurveySent extends Activity {
-	
-	
+
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		LinearLayout ll = new LinearLayout(this);
 		ll.setOrientation(LinearLayout.VERTICAL);
 		TextView text = new TextView(this);
 		text.setText("Thank you! Your survey has been successfully sent, and responses are being collected.");
-		
+
 		ll.addView(text);
 		Button button = new Button(this);
 		button.setText("View Responses");
@@ -31,10 +31,10 @@ public class SurveySent extends Activity {
 				Intent intent = new Intent(SurveySent.this, Dashboard.class);
 				startActivity(intent);
 			}
-			
+
 		});
 		ll.addView(button);
-		
+
 		Button button2 = new Button(this);
 		button2.setText("Home");
 		button2.setOnClickListener(new OnClickListener() {
@@ -44,10 +44,10 @@ public class SurveySent extends Activity {
 				Intent intent = new Intent(SurveySent.this, Main.class);
 				startActivity(intent);
 			}
-			
+
 		});
 		ll.addView(button2);
-		
+
 		setContentView(ll);
 	}
 

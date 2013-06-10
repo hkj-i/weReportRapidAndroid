@@ -18,14 +18,15 @@ public class PhaseChooser extends Activity {
 	
 	public void scopingPhase(View view) {
 		Bundle extras = getIntent().getExtras();
-		Intent intent = new Intent(this, QuestionChooser.class);
+		Intent intent = new Intent(this, SurveyCreator.class);
 		intent.putExtras(extras);
 		intent.putExtra("phase", SurveyCreationConstants.SCOPING);
+		startActivity(intent);
 	}
 	
 	public void projectPhase(View view) {
 		Bundle extras = getIntent().getExtras();
-		Intent intent = new Intent(this, QuestionChooser.class);
+		Intent intent = new Intent(this, SurveyCreator.class);
 		intent.putExtras(extras);
 		intent.putExtra("phase", SurveyCreationConstants.PROJECT);
 		
