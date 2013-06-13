@@ -1,5 +1,11 @@
 package org.rapidandroid.activity;
 
+/**
+ * Choose from
+ * - scoping
+ * - project
+ * - analysis
+ */
 import org.rapidandroid.R;
 
 import android.app.Activity;

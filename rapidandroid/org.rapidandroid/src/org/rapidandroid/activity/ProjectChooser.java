@@ -1,5 +1,10 @@
 package org.rapidandroid.activity;
 
+/**
+ * weReport
+ * Choose a project from a list of projects
+ * or create one
+ */
 import org.rapidandroid.R;
 import org.rapidandroid.data.RapidSmsDBConstants;
 

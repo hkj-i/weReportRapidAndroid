@@ -1,5 +1,8 @@
 package org.rapidandroid.activity;
 
+/**
+ * weReport Main program
+ */
 import org.rapidandroid.R;
 import org.rapidandroid.data.SmsDbHelper;
 
@@ -37,15 +40,15 @@ public class Main extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// initializes the database to prevent crashes
 		super.onCreate(savedInstanceState);
 		SmsDbHelper mDbHelper = new SmsDbHelper(this);
 		SQLiteDatabase mDb = mDbHelper.getReadableDatabase();
 		mDbHelper.close();
 		mDb.close();
-		
+	
 		setContentView(R.layout.main_activity);
 
-	
 	}
 	
 	public void createSurvey(View view) {

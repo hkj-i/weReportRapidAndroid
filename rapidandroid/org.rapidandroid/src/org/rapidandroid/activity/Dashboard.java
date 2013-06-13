@@ -135,20 +135,6 @@ public class Dashboard extends Activity {
 
 		lsv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-		// // bind a context menu
-		// lsv.setOnCreateContextMenuListener(new
-		// View.OnCreateContextMenuListener() {
-		// public void onCreateContextMenu(ContextMenu menu, View v,
-		// ContextMenuInfo menuInfo) {
-		// if (mChosenForm != null) {
-		// menu.add(0, CONTEXT_ITEM_SUMMARY_VIEW, 0, "Summary View");
-		// menu.add(0, CONTEXT_ITEM_TABLE_VIEW, 0, "Table View");
-		// } else {
-		// menu.clear();
-		// }
-		// }
-		// });
-
 		lsv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> adapter, View view, int position, long row) {
 				if (adapter.getAdapter().getClass().equals(SummaryCursorAdapter.class)) {
@@ -969,9 +955,8 @@ public class Dashboard extends Activity {
 		        // String[] splitMessage = messageRow.getString(messageRow.getColumnIndex("message")).split(" "); 
 				
 				String messageId = null;
-				if (c.getColumnIndex("message_id") == -1
-						) { //&& mFormViewMode == Dashboard.LISTVIEW_MODE_TABLE_VIEW) {
-					// summary view
+				if (c.getColumnIndex("message_id") == -1) { 
+					// show all messages view
 					Log.i("entered", "hi");
 											
 					messageId = c.getString(c.getColumnIndex("_id"));
@@ -982,6 +967,7 @@ public class Dashboard extends Activity {
 					if (c.getString(c.getColumnIndex("form_uri")) == null) {
 						// instance file doesn't exist; create one
 						// direct the user to choose a form
+						
 						mChosenMessage = messageId;
 						
 						// choose form
@@ -1026,7 +1012,7 @@ public class Dashboard extends Activity {
 							null);
 					messageRow.moveToFirst();			
 					for (int i = 0; i < messageRow.getColumnCount(); i++) {
-					   	Log.i(i + " Colum name: ", messageRow.getColumnName(i));
+					   	Log.i(i + " Column name: ", messageRow.getColumnName(i));
 				
 					}
 					messageRow.moveToFirst();
@@ -1053,7 +1039,7 @@ public class Dashboard extends Activity {
 						
 						// create instance file
 						// call XML translator
-						/*
+						
 						XMLTranslator XMLGenerator = new XMLTranslator();
 						XMLGenerator.initFormCache();
 						
@@ -1072,17 +1058,15 @@ public class Dashboard extends Activity {
 								messageRow.getString(messageRow.getColumnIndex("form_uri")));
 						
 						// open it
-						Log.i("Dashboard", "single survey, form didn't exists, message uri: " + messageUri);
+						Log.i("Dashboard", "single survey, form didn't exist, message uri: " + messageUri);
 						Intent intent = new Intent();
 					    intent.setComponent(new ComponentName("org.odk.collect.android",
 					             "org.odk.collect.android.activities.FormEntryActivity"));
 					    intent.setAction(Intent.ACTION_EDIT);
 					    intent.setData(messageUri);
-					     
+					    
 					    startActivity(intent);
 					    // hee TODO uncomment this out
-					     * 
-					     */
 					}
 				} // end hee
 			}
@@ -1147,35 +1131,6 @@ public class Dashboard extends Activity {
 													new String[] { "Select an item" }));
 		} else {
 
-			
-			
-			/*  Nicole: A failed attempt at including survey information on the message list
-			
-			View view = new View(this);
-			
-			
-			int formID = mChosenForm.getFormId();
-			Form mForm = ModelTranslator.getFormById(formID);
-
-			TextView txv_formname = new TextView(this);
-			
-			TextView txv_prefix = new TextView(this);
-			TextView txv_description = new TextView(this);
-
-			ListView lsv_fields = (ListView) findViewById(R.id.lsv_fields);
-
-			txv_formname.setText("Form Name: " + mForm.getFormName());
-			txv_prefix.setText("Prefix: " + mForm.getPrefix());
-			txv_description.setText("Question: " + mForm.getDescription());
-
-			LinearLayout ll = new LinearLayout(this);
-			ll.setOrientation(LinearLayout.VERTICAL);
-			ll.addView(txv_formname);
-			ll.addView(txv_prefix);
-			ll.addView(txv_description);
-			LayoutParams lps = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			addContentView(ll, lps);
-			*/
 			if (mListviewCursor.getCount() == 0) {
 				lsv.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
 														new String[] { "No data" }));

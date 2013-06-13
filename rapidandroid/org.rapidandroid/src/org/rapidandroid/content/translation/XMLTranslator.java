@@ -21,7 +21,7 @@ import android.util.Log;
 import android.util.Pair;
 
 public class XMLTranslator {
-	// hee
+	// Variables for storing ODK and project name
 	private static String PROJECT_NAME = "capstone_report";
 	private static String ODK_INSTANCE = "content://org.odk.collect.android.provider.odk.instances/instances/";
 	

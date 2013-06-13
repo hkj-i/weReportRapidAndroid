@@ -1,4 +1,8 @@
 package org.rapidandroid.activity;
+
+/**
+ * Creates a survey
+ */
 import org.rapidandroid.data.RapidSmsDBConstants;
 
 import org.rapidandroid.R;

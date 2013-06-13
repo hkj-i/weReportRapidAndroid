@@ -1,5 +1,9 @@
 package org.rapidandroid.activity;
 
+/**
+ * Sends an SMS to people who text to the phone number, informing them about current number figures
+ * from the survey
+ */
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

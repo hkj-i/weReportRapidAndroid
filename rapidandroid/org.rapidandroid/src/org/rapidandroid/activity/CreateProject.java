@@ -1,5 +1,12 @@
 package org.rapidandroid.activity;
 
+/**
+ * weReport
+ * Creating a project; prompts the user for a project name, project id, project location
+ * and an optional project description
+ * and enters the information into the database
+ */
+
 import org.rapidandroid.data.RapidSmsDBConstants;
 
 import org.rapidandroid.R;

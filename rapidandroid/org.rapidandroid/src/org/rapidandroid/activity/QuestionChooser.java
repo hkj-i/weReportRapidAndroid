@@ -1,5 +1,9 @@
 package org.rapidandroid.activity;
 
+/**
+ * Pulls up the question bank and displays the questions on the screen
+ * in text views
+ */
 import org.rapidandroid.content.translation.ModelTranslator;
 import org.rapidandroid.data.RapidSmsDBConstants;
 import org.rapidandroid.data.SurveyCreationConstants;

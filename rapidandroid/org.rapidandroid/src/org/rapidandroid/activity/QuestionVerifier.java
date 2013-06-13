@@ -1,5 +1,10 @@
 package org.rapidandroid.activity;
 
+/**
+ * Before sending the message, show the message to the users
+ * On this page, a user can view the message to be sent
+ * and choose the contacts to whom the messages will be delivered
+ */
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
