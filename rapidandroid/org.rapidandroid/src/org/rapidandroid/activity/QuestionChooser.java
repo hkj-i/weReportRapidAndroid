@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class QuestionChooser extends Activity {
 
@@ -42,16 +43,43 @@ public class QuestionChooser extends Activity {
 	    final LinearLayout ll = new LinearLayout(this);
 	    ll.setOrientation(LinearLayout.VERTICAL);
 
+	    TextView intro = new TextView(this);
+	    String introString = "Please choose at least one question from the following.  " +
+	    				"For the questions selected, please fill in the blanks with " +
+	    				"the desired information.  ";
+	    
+	    int phase = -1;
+	    if (extras.containsKey("phase")) {
+	    	phase = extras.getInt("phase");
+	    } else {
+	    	return;
+	    }
+	    TextView exampleTV = new TextView(this);
+	    String example = "";
+	    if (phase == SurveyCreationConstants.ANALYSIS) {
+	    	example = "For example, \"Rate your participation in building the well.\"";
+	    } else if (phase == SurveyCreationConstants.SCOPING) {
+	    	introString += "For SELECT questions, please fill in at least two options.";
+	    	example = "For example, \"Select the most important community project from " +
+					"the following options: 1. well, 2. latrine.\"";
+	    }
+	    
+	    intro.setText(introString);
+	    intro.setTextSize(20);
+	    intro.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+	    intro.setPadding(0,0,0,20);
+	    ll.addView(intro);
+	    
+	    if (!example.equals("")) {
+	    	exampleTV.setText(example);
+	    	exampleTV.setTextSize(20);
+	    	exampleTV.setPadding(0,0,0,20);
+	    	ll.addView(exampleTV);
+	    }
 	    // initialize the question bank based on the phase
 		QuestionBank questionBank;
-		if (!extras.containsKey("phase")) {
-			// TODO throw some error
-			questionBank = new QuestionBank(extras.getInt("phase"));
-		} else {
+		questionBank = new QuestionBank(phase);
 
-			questionBank = new QuestionBank(extras.getInt("phase"));
-
-		}
 
 		// We're on question 0 to start with
 		int questionNumber = 0;
@@ -79,6 +107,7 @@ public class QuestionChooser extends Activity {
 			if (questionParts.length > 0) {
 				TextView text = new TextView(this);
 				text.setText(questionParts[0]);
+				//text.setTextSize(20);
 				vg.addView(text);
 			}
 			 wholeBlock.addView(vg);
@@ -91,7 +120,12 @@ public class QuestionChooser extends Activity {
 				EditText projectEntry = new EditText(this);
 				TextView text = new TextView(this);
 				TextView text2 = new TextView(this);
+				//text.setTextSize(20);
+				//text2.setTextSize(20);
 				if (questionParts[i].length() > 40) {
+					
+					
+					
 					text.setText(questionParts[i].substring(0, questionParts[i].indexOf(" ", 32)));
 					text2.setText(questionParts[i].substring(questionParts[i].indexOf(" ", 32)));
 				} else {
@@ -112,10 +146,12 @@ public class QuestionChooser extends Activity {
 					if (number == 4) {
 						TextView period = new TextView(this);
 						period.setText(".");
+						//period.setTextSize(20);
 						line.addView(period);
 					} else {
 						TextView space = new TextView(this);
 						space.setText(", ");
+						//space.setTextSize(20);
 						line.addView(space);
 					}
 					
@@ -158,6 +194,7 @@ public class QuestionChooser extends Activity {
 
 		Button nextButton = new Button(this);
 		nextButton.setText("Next");
+		nextButton.setPadding(0, 20, 0, 20);
 		nextButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -173,6 +210,20 @@ public class QuestionChooser extends Activity {
 				boolean atLeastOneQuestionChecked = false;
 				int surveyId = -1;
 
+				// Save our survey now.
+				ContentResolver resolver = getContentResolver();
+				ContentValues cv1 = new ContentValues();
+				cv1.put("location", getIntent().getExtras().getString("surveylocation"));
+				cv1.put("surveyname", getIntent().getExtras().getString("surveyname"));
+				cv1.put("phase", getIntent().getExtras().getInt("phase"));
+				if (getIntent().getExtras().containsKey("description")) {
+					cv1.put("description", getIntent().getExtras().getString("description"));
+				}
+				resolver.insert(RapidSmsDBConstants.Survey.CONTENT_URI, cv1);
+				
+				
+				
+				
 				Log.i("QuestionChooser", "ll child count " + ll.getChildCount());
 				for (int i = 0; i < questionBank2.getQuestions().size(); i++) {
 					//if (ll.getChildAt(i).getClass().equals(LinearLayout.class)) {
@@ -234,6 +285,13 @@ public class QuestionChooser extends Activity {
 								if (innerLoopBroken)
 									break;
 							}
+							
+							if (newQuestionText.contains("1.") && !newQuestionText.contains("4.") ) {
+								char[] newQuestionChar = newQuestionText.toCharArray();
+								newQuestionChar[newQuestionText.lastIndexOf(",")] = '.';
+								newQuestionText = new String(newQuestionChar);
+							}
+							
 							Log.i("QuestionChooser", "new question: " +newQuestionText);
 							Log.i("QuestionBankSize", ""+questionBank2.getQuestions().size());
 							Log.i("i", ""+i);
@@ -244,10 +302,10 @@ public class QuestionChooser extends Activity {
 							questionNumber++;
 
 							Log.i("QuestionChooser", "hello!");
-							ContentResolver resolver = getContentResolver();
-							Log.i("QuestionChooser", "querying surveyname \'" + getIntent().getExtras().getString("surveyname") + "\'");
+							
+							Log.i("QuestionChooser", "querying surveyname " + getIntent().getExtras().getString("surveyname"));
 
-							String[] selectionArgs = {"\'" + getIntent().getExtras().getString("surveyname") + "\'"};
+							String[] selectionArgs = {getIntent().getExtras().getString("surveyname") };
 							Cursor surveyRow = resolver.query(RapidSmsDBConstants.Survey.CONTENT_URI,
 																null, 
 																"surveyname = ?",
@@ -264,14 +322,14 @@ public class QuestionChooser extends Activity {
 							String formName = getIntent().getExtras().getString("surveyname") + " Question " + questionNumber;
 							Log.i("QuestionChooser", "formName " + formName);
 
-							String description = newQuestionText + " Reply \"" + prefix + " ";
+							String description = newQuestionText + " Reply " + prefix + " ";
 							if (question.getQuestionType() == SurveyCreationConstants.QuestionTypes.YESNO) {
-								description += "[yes/no]\"";
+								description += "[yes/no]";
 							} else if (question.getQuestionType() == SurveyCreationConstants.QuestionTypes.RATING) {
-								description += "[1-10]\"";
+								description += "[1-10]";
 							} else if (question.getQuestionType() == SurveyCreationConstants.QuestionTypes.MULTIPLECHOICE) {
 								j--;
-								description += "[1-" + j + "]\"";
+								description += "[1-" + j + "]";
 							}
 							//description += question.getFields().get(0).getFieldType().getReadableName() + "\"";
 
@@ -324,7 +382,8 @@ public class QuestionChooser extends Activity {
 					intent.putExtra("survey_id", surveyId);
 					startActivity(intent);
 				} else {
-					// TODO error message
+					Toast toast = Toast.makeText(QuestionChooser.this, "Please choose at least one question.", Toast.LENGTH_LONG);
+					toast.show();
 				}
 			}
 

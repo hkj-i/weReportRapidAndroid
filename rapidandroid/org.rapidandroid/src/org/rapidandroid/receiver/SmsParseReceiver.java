@@ -20,34 +20,28 @@
  */
 package org.rapidandroid.receiver;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Vector;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.rapidandroid.ApplicationGlobals;
 import org.rapidandroid.content.translation.MessageTranslator;
 import org.rapidandroid.content.translation.ModelTranslator;
 import org.rapidandroid.content.translation.ParsedDataTranslator;
+import org.rapidandroid.content.translation.XMLTranslator;
 import org.rapidandroid.data.RapidSmsDBConstants;
+import org.rapidandroid.data.SurveyCreationConstants;
 import org.rapidsms.java.core.model.Form;
 import org.rapidsms.java.core.model.Monitor;
 import org.rapidsms.java.core.parser.IParseResult;
 import org.rapidsms.java.core.parser.service.ParsingService;
 
-import org.rapidandroid.content.translation.*;
-
 import android.content.BroadcastReceiver;
-import android.content.ContentProviderClient;
-import android.content.ContentValues;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.RemoteException;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 /**
@@ -146,17 +140,171 @@ public class SmsParseReceiver extends BroadcastReceiver {
 			Log.i("SmsParseReceiver", "made it through messagetranslator call");
 			
 			// if(mon.getReplyPreference()) {
-			/*if (ApplicationGlobals.doReplyOnParse()) {
-				// for debug purposes, we'll just ack every time.
-				Intent broadcast = new Intent("org.rapidandroid.intents.SMS_REPLY");
-				broadcast.putExtra(SmsReplyReceiver.KEY_DESTINATION_PHONE, intent.getStringExtra("from"));
-				broadcast.putExtra(SmsReplyReceiver.KEY_MESSAGE, ApplicationGlobals.getParseSuccessText());
-				context.sendBroadcast(broadcast);
-			}*/
+			//if (ApplicationGlobals.doReplyOnParse()) {
+			
+			
+			//Intent broadcast = new Intent("org.rapidandroid.intents.SMS_REPLY");
+			//broadcast.putExtra(SmsReplyReceiver.KEY_DESTINATION_PHONE, intent.getStringExtra("from"));
+			//broadcast.putExtra(SmsReplyReceiver.KEY_MESSAGE, reply);
+			//context.sendBroadcast(broadcast);
+			//}
 			Vector<IParseResult> results = ParsingService.ParseMessage(form, body);
 			Log.i("SmsParseReceiver", "made it through parsingservice call");
 			ParsedDataTranslator.InsertFormData(context, form, msgid, results);
 			Log.i("SmsParseReceiver", "made it through insertformdata");
+			
+			
+			// Nicole: Code to reply to a received text with well formed prefix
+						ContentResolver contentResolver = context.getContentResolver();
+						
+						Log.i("SmsParseReceiver", "looking for form id " + form.getFormId());
+						//String[] args = {form.getFormName()};
+						Cursor formRow = contentResolver.query(RapidSmsDBConstants.Form.CONTENT_URI, 
+								null,
+								"_id = " + form.getFormId(), 
+								null, 
+								null);
+						
+						if (formRow == null) {
+							Log.i("SmsParseReceiver", "formRow null");
+						} else if (formRow.getCount() == 0) {
+							Log.i("SmsParseReceiver", "formRow nonexistant");
+						}
+						formRow.moveToFirst();
+						
+						Log.i("SmsParseReceiver", "getting question type");
+						int questionType = formRow.getInt(formRow.getColumnIndex("question_type"));
+						
+						Log.i("SmsParseReceiver", "getting description");
+						String description = formRow.getString(formRow.getColumnIndex("description"));
+						
+						Log.i("SmsParseReceiver", "description " + description);
+						// Cut off the "Reply ___" part of the text
+						int endIndex = description.indexOf("Reply");
+						
+						Log.i("SmsParseReceiver", "endIndex " + endIndex);
+						String question = description.substring(0, endIndex);
+						
+						//String reply = "Thank you for answering the question: " + question;
+						String reply = "Thanks for your response! ";
+						reply += "Currently, your community has responded: ";
+								
+						// Now get the currently collected responses.
+						String uriString = RapidSmsDBConstants.FormData.CONTENT_URI_PREFIX
+								+ form.getFormId();
+						Log.i("SmsParseReceiver", "querying for all form data, uri string: " + uriString);
+						Log.i("SmsParseReceiver", "uri string " + RapidSmsDBConstants.Form.CONTENT_URI_STRING);
+						Cursor allFormData = contentResolver.query(Uri.parse(uriString), 
+								null, 
+								null, 
+								null, 
+								null);
+						
+						allFormData.moveToFirst();
+						if (questionType == SurveyCreationConstants.QuestionTypes.MULTIPLECHOICE) {
+							
+							// TODO this code is repeated in three places. Here, XMLTranslator, and QuestionVerifier.
+							// should modularize.
+							
+							// This gets the field names we're choosing between for multiple choice.
+							String[] selects = new String[4];
+							for (int j = 1; j <= 4; j++) {
+								if (description.contains(j + ". ")) {
+									int k = j + 1;
+									if (description.contains(k + ". ")) {
+										selects[j-1] = description.substring(description.indexOf("" + j + ". ") + 3, 
+																			description.indexOf(",  " + k + ". "));
+									} else {
+										selects[j-1] = description.substring(description.indexOf("" + j + ". ") + 3, 
+												description.indexOf(".", description.indexOf("" + j + ". ") +3));
+									}
+								}
+							}
+								
+							
+							int k = 0;
+							while (k < 4 && selects[k] != null) {
+								k++;
+							}
+							Log.i("label",""+ k);
+							String[] labels = new String[k];
+							for (int i = 0; i < k; i++) {
+								
+								labels[i] = selects[i];
+								Log.i("label", labels[i]);
+							}
+							
+							// Count up all the responses
+							int[] tally = new int[k];
+							int total = 0;
+							while (!allFormData.isAfterLast()) {
+								Log.i("SmsParseReceiver", "Iteration of tallying");
+								int selection = allFormData.getInt(2);
+								if (selection <= k) {
+									tally[selection - 1]++;
+									total++;
+								}
+								allFormData.moveToNext();
+							}
+							
+							
+							// Build our reply
+							int i;
+							for (i = 0; i < k - 1; i++) {
+								
+								int percent = (int) Math.floor(100 * (double) tally[i]/ (double) total);
+								reply += percent + "% " + labels[i] + ", ";
+							}
+							int percent = (int) Math.floor(100 * (double) tally[i]/ (double) total);
+							reply += percent + "% " + labels[i] + ".";
+							
+							
+						} else if (questionType == SurveyCreationConstants.QuestionTypes.YESNO) {
+							
+							int yesTally = 0;
+							int noTally = 0;
+							int total = 0;
+							
+							while (!allFormData.isAfterLast()) {
+								if (allFormData.getString(2).toLowerCase().equals("true")) {
+									yesTally++;
+								} else {
+									noTally++;
+								}
+								total++;
+								allFormData.moveToNext();
+							}
+							
+							int yesPercent = (int) Math.floor(100 * (double) yesTally/ (double) total);
+							int noPercent = (int) Math.floor(100 * (double) noTally/ (double) total);
+
+							reply += yesPercent + "% Yes, " + noPercent + "% No.";
+							
+						} else if (questionType == SurveyCreationConstants.QuestionTypes.RATING) {
+							int tally = 0;
+							int total = 0;
+							while (!allFormData.isAfterLast()) {
+								int rating = allFormData.getInt(2);
+								if (rating <= 10 && rating >= 0) {
+									tally += rating;
+								}
+								total++;
+								allFormData.moveToNext();
+							}
+							
+							reply += "Average Rating " + String.format("%.2g%n", (double) tally/ (double) total) + ".";
+							
+						}
+						Log.i("SmsParseReceiver", "sending reply text: " + reply);
+						
+						SmsManager smsManager = SmsManager.getDefault();
+						Log.i("SmsParseReceiver", "sending text to: " + intent.getStringExtra("from"));
+						smsManager.sendTextMessage(intent.getStringExtra("from"), null, reply, null, null);
+						//smsManager.sendTextMessage("5556", null, reply, null, null);
+
+			
+			
+			
 		}
 		
 		XMLTranslator translator = new XMLTranslator();
@@ -176,6 +324,11 @@ public class SmsParseReceiver extends BroadcastReceiver {
 		}
 		*/
 		
+	}
+
+	private ContentResolver getContentResolver() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

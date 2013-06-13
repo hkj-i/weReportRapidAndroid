@@ -15,6 +15,12 @@
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
+        android:text="@string/button_viewsurveys" 
+        android:onClick="viewSurveys"/>
+    <Button
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
         android:text="@string/button_viewresponses" 
         android:onClick="viewResponses"/>
 </LinearLayout>

@@ -29,7 +29,7 @@ public class PhaseChooser extends Activity {
 		Intent intent = new Intent(this, SurveyCreator.class);
 		intent.putExtras(extras);
 		intent.putExtra("phase", SurveyCreationConstants.PROJECT);
-		
+		startActivity(intent);
 	}
 	
 	public void analysisPhase(View view) {

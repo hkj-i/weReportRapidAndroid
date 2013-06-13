@@ -94,6 +94,7 @@ public class SmsReceiver extends BroadcastReceiver {
 		// mesg.getTimestampMillis()); //longs don't store as datetimes
 		messageValues.put(RapidSmsDBConstants.Message.IS_OUTGOING, false);
 		messageValues.put("is_sent", false);
+		messageValues.put("is_finalized", false);
 		Date now = new Date();
 		messageValues.put(RapidSmsDBConstants.Message.RECEIVE_TIME, Message.SQLDateFormatter.format(now)); // profile
 																											// has

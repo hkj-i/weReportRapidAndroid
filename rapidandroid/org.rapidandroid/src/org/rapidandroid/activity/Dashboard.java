@@ -20,22 +20,18 @@
  */
 package org.rapidandroid.activity;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.rapidandroid.R;
-import org.rapidandroid.activity.FormReviewer.CallParams;
 import org.rapidandroid.content.translation.ModelTranslator;
 import org.rapidandroid.content.translation.XMLTranslator;
 import org.rapidandroid.data.RapidSmsDBConstants;
 import org.rapidandroid.data.controller.DashboardDataLayer;
 import org.rapidandroid.data.controller.MessageDataReporter;
 import org.rapidandroid.data.controller.ParsedDataReporter;
-import org.rapidandroid.receiver.FormCreationFileObserver;
 import org.rapidandroid.view.SingleRowHeaderView;
-import org.rapidandroid.view.adapter.FieldViewAdapter;
 import org.rapidandroid.view.adapter.FormDataGridCursorAdapter;
 import org.rapidandroid.view.adapter.MessageCursorAdapter;
 import org.rapidandroid.view.adapter.SummaryCursorAdapter;
@@ -55,7 +51,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -64,11 +59,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -107,6 +104,121 @@ public class Dashboard extends Activity {
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
+		
+		//super.onCreate(savedInstanceState);
+		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		setTitle("RapidAndroid :: Dashboard");
+		setContentView(R.layout.dashboard);
+
+		this.initFormSpinner();
+		// Set the event listeners for the spinner and the listview
+		Spinner spin_forms = (Spinner) findViewById(R.id.cbx_forms);
+		spin_forms.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View theview, int position, long rowid) {
+				spinnerItemSelected(position);
+			}
+
+			public void onNothingSelected(AdapterView<?> parent) {
+				// blow away the listview's items
+				mChosenForm = null;
+				resetCursor = true;
+				loadListViewWithFormData();
+			}
+		});
+
+		// add some events to the listview
+		ListView lsv = (ListView) findViewById(R.id.lsv_dashboardmessages);
+
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		mScreenWidth = dm.widthPixels - 8;
+
+		lsv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+		// // bind a context menu
+		// lsv.setOnCreateContextMenuListener(new
+		// View.OnCreateContextMenuListener() {
+		// public void onCreateContextMenu(ContextMenu menu, View v,
+		// ContextMenuInfo menuInfo) {
+		// if (mChosenForm != null) {
+		// menu.add(0, CONTEXT_ITEM_SUMMARY_VIEW, 0, "Summary View");
+		// menu.add(0, CONTEXT_ITEM_TABLE_VIEW, 0, "Table View");
+		// } else {
+		// menu.clear();
+		// }
+		// }
+		// });
+
+		lsv.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> adapter, View view, int position, long row) {
+				if (adapter.getAdapter().getClass().equals(SummaryCursorAdapter.class)) {
+					((SummaryCursorAdapter) adapter.getAdapter()).toggle(position);
+				}
+			}
+		});
+		rb100 = (RadioButton) findViewById(R.id.dashboard_rad_100);
+		rb100.setOnClickListener(radioClickListener);
+
+		rb500 = (RadioButton) findViewById(R.id.dashboard_rad_500);
+		rb500.setOnClickListener(radioClickListener);
+
+		rball = (RadioButton) findViewById(R.id.dashboard_rad_all);
+		rball.setOnClickListener(radioClickListener);
+
+		rb100.setChecked(true);
+
+		// by default on startup:
+		// mEndDate = new Date();
+		// mStartDate = new Date();
+		// mStartDate.setDate(mEndDate.getDate() - 7);
+
+		mViewSwitcher = (ViewSwitcher) findViewById(R.id.dashboard_switcher);
+
+		mHeaderTable = (TableLayout) findViewById(R.id.dashboard_headertbl);
+		// these animations are too fracking slow
+		// Animation in = AnimationUtils.loadAnimation(this,
+		// android.R.anim.fade_in);
+		// Animation out = AnimationUtils.loadAnimation(this,
+		// android.R.anim.fade_out);
+		// mViewSwitcher.setInAnimation(in);
+		// mViewSwitcher.setOutAnimation(out);
+		
+		mFormViewMode = LISTVIEW_MODE_TABLE_VIEW;
+		this.mBtnViewModeSwitcher = (ImageButton) findViewById(R.id.btn_switch_mode);
+		// hee - making summary button go away
+		mBtnViewModeSwitcher.setVisibility(View.INVISIBLE);
+		mFormViewMode = LISTVIEW_MODE_TABLE_VIEW;
+		/*
+		 * hee commented it out because we don't use the summary view 
+		mBtnViewModeSwitcher.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				// this is on click, so we want to toggle it!
+				switch (mFormViewMode) {
+					case LISTVIEW_MODE_SUMMARY_VIEW:
+						mFormViewMode = LISTVIEW_MODE_TABLE_VIEW;
+
+						break;
+					case LISTVIEW_MODE_TABLE_VIEW:
+						mFormViewMode = LISTVIEW_MODE_SUMMARY_VIEW;
+
+						break;
+				}
+				resetCursor = false;
+				beginListViewReload();
+			}
+		});
+		*/
+		
+		// TODO I added this code, hope it doesn't break things...
+		
+		//File externalStorageDir = Environment.getExternalStorageDirectory();
+		//String odkFormsPath = externalStorageDir.getAbsoluteFile() + "/odk/forms/";
+		//formWatcher = new FormCreationFileObserver(odkFormsPath);
+		//formWatcher.addContext(this);
+		//formWatcher.startWatching();
+		//Log.i("Dashboard", "Called file observer constructer");
+		
 	}
 
 	private SingleRowHeaderView headerView;
@@ -1036,27 +1148,34 @@ public class Dashboard extends Activity {
 		} else {
 
 			
+			
+			/*  Nicole: A failed attempt at including survey information on the message list
+			
+			View view = new View(this);
+			
+			
 			int formID = mChosenForm.getFormId();
 			Form mForm = ModelTranslator.getFormById(formID);
 
-			TextView txv_formname = (TextView) findViewById(R.id.txv_formname);
-			TextView txv_prefix = (TextView) findViewById(R.id.txv_formprefix);
-			TextView txv_description = (TextView) findViewById(R.id.txv_description);
+			TextView txv_formname = new TextView(this);
+			
+			TextView txv_prefix = new TextView(this);
+			TextView txv_description = new TextView(this);
 
 			ListView lsv_fields = (ListView) findViewById(R.id.lsv_fields);
 
-			txv_formname.setText(mForm.getFormName());
-			txv_prefix.setText(mForm.getPrefix());
-			txv_description.setText(mForm.getDescription());
+			txv_formname.setText("Form Name: " + mForm.getFormName());
+			txv_prefix.setText("Prefix: " + mForm.getPrefix());
+			txv_description.setText("Question: " + mForm.getDescription());
 
-			int len = mForm.getFields().length;
-
-			// lsv_fields.setAdapter(new ArrayAdapter<String>(this,
-			// android.R.layout.simple_list_item_1, fields));
-			lsv_fields.setAdapter(new FieldViewAdapter(this, mForm.getFields()));
-			
-			
-			
+			LinearLayout ll = new LinearLayout(this);
+			ll.setOrientation(LinearLayout.VERTICAL);
+			ll.addView(txv_formname);
+			ll.addView(txv_prefix);
+			ll.addView(txv_description);
+			LayoutParams lps = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			addContentView(ll, lps);
+			*/
 			if (mListviewCursor.getCount() == 0) {
 				lsv.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
 														new String[] { "No data" }));

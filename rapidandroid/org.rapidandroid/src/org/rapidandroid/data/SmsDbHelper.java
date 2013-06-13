@@ -103,6 +103,7 @@ public class SmsDbHelper extends SQLiteOpenHelper {
 				+ "\"time\" datetime NOT NULL," + "\"message\" varchar(160) NOT NULL,"
 				+ "\"is_outgoing\" bool NOT NULL," + "\"is_virtual\" bool NOT NULL,"
 				+ "\"is_sent\" integer NULL,"
+				+ "\"is_finalized\" integer NULL,"
 				+ "\"form_uri\" varchar(512) NULL," // TODO look up max chars for URI
 				+ "\"receive_time\" datetime NULL);";
 

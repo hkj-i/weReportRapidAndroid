@@ -53,6 +53,7 @@ public class QuestionVerifier extends Activity {
 
 		TextView verify = new TextView(this);
 		verify.setText("Are these the questions you wish to send?");
+		verify.setTextSize(20);
 		ll.addView(verify);
 
 		ContentResolver resolver = getContentResolver();
@@ -63,6 +64,7 @@ public class QuestionVerifier extends Activity {
 		questions.moveToFirst();
 		for (int i = 1; i < questions.getCount(); i++) {
 			TextView question = new TextView(this);
+			question.setTextSize(18);
 			question.append(i + ". " + questions.getString(questions.getColumnIndex("description")));
 
 
@@ -70,6 +72,7 @@ public class QuestionVerifier extends Activity {
 			questions.moveToNext();
 		}
 		TextView question = new TextView(this);
+		question.setTextSize(18);
 		question.append(questions.getCount() + ". " + questions.getString(questions.getColumnIndex("description")));
 
 
@@ -157,6 +160,51 @@ public class QuestionVerifier extends Activity {
 					} else if (questionType == SurveyCreationConstants.QuestionTypes.YESNO) {
 						String[] labels = {"Yes", "No"};
 						fields += SurveyCreationConstants.xForm.getSelectFieldXml(1, prompt, labels);
+					} else if (questionType == SurveyCreationConstants.QuestionTypes.MULTIPLECHOICE) {
+						
+						
+						String[] selects = new String[4];
+						String shortprompt = prompt.substring(0, prompt.indexOf("1. "));
+						for (int j = 1; j <= 4; j++) {
+							if (prompt.contains(j + ". ")) {
+								int k = j + 1;
+								Log.i("QuestionVerifier", "j = " + j);
+								Log.i("prompt", prompt);
+								if (prompt.contains(k + ".")) {
+									
+									Log.i("QuestionVerifier", "prompt contains " + k + ".");
+									
+									String startString = "" + j + ". ";
+									String endString = ",  " + k; //todo need to trim whitespace off each input if this is gonna work
+									int start = prompt.indexOf(startString);
+									int end = prompt.indexOf(endString);
+									
+									Log.i("QuestionVerifier", "start index " + start + " start string " + startString);
+									Log.i("QuestionVerifier", "end index " + end + " end string " + endString);
+
+									selects[j-1] = prompt.substring(start, end);
+								} else {
+									Log.i("QuestionVerifier", "prompt doesn't contain " + k + ".");
+									selects[j-1] = prompt.substring(prompt.indexOf("" + j + "."), 
+											prompt.indexOf(".", prompt.indexOf("" + j + ".") +3));
+									//selects[j-1].replace(",", "");
+									//selects[j-1].replace(".", "");
+								}
+							}
+						}
+						int k = 0;
+						while (k < 4 && selects[k] != null) {
+							k++;
+						}
+						Log.i("label",""+ k);
+						String[] labels = new String[k];
+						for (int i = 0; i < k; i++) {
+							
+							labels[i] = selects[i];
+							Log.i("label", labels[i]);
+						}
+						
+						fields += SurveyCreationConstants.xForm.getSelectFieldXml(1, shortprompt, labels);
 					}
 
 					String[] selectionArgs = {surveyName};

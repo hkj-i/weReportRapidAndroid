@@ -20,7 +20,7 @@ public class SurveySent extends Activity {
 		ll.setOrientation(LinearLayout.VERTICAL);
 		TextView text = new TextView(this);
 		text.setText("Thank you! Your survey has been successfully sent, and responses are being collected.");
-
+		text.setTextSize(18);
 		ll.addView(text);
 		Button button = new Button(this);
 		button.setText("View Responses");

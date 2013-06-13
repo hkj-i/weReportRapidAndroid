@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="unittests"/>
-	<classpathentry kind="src" path="library-src"/>
 	<classpathentry kind="src" path="lib-src"/>
-	<classpathentry kind="src" path="lib-src-2"/>
+	<classpathentry kind="src" path="library-src"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-0.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.0-beta2.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>

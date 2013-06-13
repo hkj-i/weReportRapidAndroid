@@ -15,6 +15,7 @@
  *
  */
 
+//
 package org.rapidandroid.view.adapter;
 
 import java.util.Date;
@@ -42,6 +43,15 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+/*
+ * Used for drawing the list when user chooses
+ * show all messages
+ * 
+ * there are three states reflected by the checkmark
+ * grey is not well-formed
+ * blue is finalized(well-formed) but not sent
+ * green is finalized(well-formed) and sent to Aggregate
+ */
 public class MessageCursorAdapter extends CursorAdapter {
 
 	public MessageCursorAdapter(Context context, Cursor c) {
@@ -69,6 +79,12 @@ public class MessageCursorAdapter extends CursorAdapter {
 				issent = true;
 			}
 			
+			boolean isfinalized = false;
+			String isfinalized_s = cursor.getString(8);
+			if (isfinalized_s != null && isfinalized_s.equals("1")) {
+				isfinalized = true;
+			}
+			
 			Date hackDate = new Date();
 			boolean success = false;
 			try {
@@ -80,7 +96,7 @@ public class MessageCursorAdapter extends CursorAdapter {
 
 			SimpleMessageView srv = (SimpleMessageView) view;
 			//srv.setData(message, hackDate, MonitorID, isoutgoing);
-			srv.setData(message, hackDate, MonitorID, isoutgoing, issent);
+			srv.setData(message, hackDate, MonitorID, isoutgoing, issent, isfinalized);
 		}
 
 	}
@@ -111,13 +127,17 @@ public class MessageCursorAdapter extends CursorAdapter {
 			issent = true;
 		}
 		
+		boolean isfinalized = false;
+		String isfinalized_s = cursor.getString(8);
+		if (isfinalized_s != null && isfinalized_s.equals("1")) {
+			isfinalized = true;
+		}
+		
 		Log.i("newView: issent -", cursor.getString(7));
 		Date hackDate = new Date();
 		
-		// pull to see sent
-		// hee
-		// SimpleMessageView srv = new SimpleMessageView(context, message, hackDate, MonitorID, isoutgoing);
-		SimpleMessageView srv = new SimpleMessageView(context, message, hackDate, MonitorID, isoutgoing, issent);
+		// Changed to include issent, isfinalized
+		SimpleMessageView srv = new SimpleMessageView(context, message, hackDate, MonitorID, isoutgoing, issent, isfinalized);
 		return srv;
 	}
 
@@ -129,7 +149,8 @@ public class MessageCursorAdapter extends CursorAdapter {
 		private TextView txvMessage;
 		private ImageView txvIssent;
 
-		public SimpleMessageView(Context context, String message, Date timestamp, int monitorID, boolean isOutgoing, boolean issent) {
+		public SimpleMessageView(Context context, String message, Date timestamp, 
+				int monitorID, boolean isOutgoing, boolean issent, boolean isfinalized) {
 			super(context);
 			Log.i("MessageCursorViewThing", "hello");
 			mHeaderRow = new TableRow(context);
@@ -139,39 +160,15 @@ public class MessageCursorAdapter extends CursorAdapter {
 			txvDate.setPadding(3, 3, 3, 3);
 			txvDate.setGravity(Gravity.LEFT);
 			
-			/* hee
-			txvFrom = new TextView(context);
-			txvFrom.setTextSize(16);
-			txvFrom.setPadding(3, 3, 8, 3);
-			txvFrom.setGravity(Gravity.RIGHT);
-			*/
-			
-			// this.addView(txvHeader, new
-			// LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
-			// LayoutParams.WRAP_CONTENT));
 			mHeaderRow.addView(txvDate);
-			// mHeaderRow.addView(txvFrom); hee
-			
-			// hee
-			/*
-			CheckBox checkbox = new CheckBox(getContext());
-	        // right now, make it checked by default
-	        checkbox.setChecked(true);
-	        checkbox.setClickable(false);
-	        // the check box is not clickable: hee
-	        checkbox.setFocusable(false);
-	        //mDataCols.add(coldata);
-	        mHeaderRow.addView(checkbox);
-			// end hee
-			 */
-	        
-	        // hee add checkmark
+
 	        txvIssent = new ImageView(getContext());
-	       // checkmark.setChecked(false); // eh hack
-	        if (issent) {
-	        	txvIssent.setImageResource(R.drawable.checkmark_on);
+	        if (issent && isfinalized) {
+	        	txvIssent.setImageResource(R.drawable.checkmark_green);
+	        } else if (isfinalized) {
+	        	txvIssent.setImageResource(R.drawable.checkmark_blue);
 	        } else {
-	        	txvIssent.setImageResource(R.drawable.checkmark_off);
+	        	txvIssent.setImageResource(R.drawable.checkmark_grey);
 	        }
 	        mHeaderRow.addView(txvIssent);
 	        
@@ -180,31 +177,27 @@ public class MessageCursorAdapter extends CursorAdapter {
 			txvMessage = new TextView(context);
 			txvMessage.setTextSize(12);
 			txvMessage.setPadding(8, 2, 8, 2);
-			// this.addView(txvMessage, new
-			// LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,
-			// LayoutParams.WRAP_CONTENT));
 			this.addView(txvMessage);
 
 			this.setColumnStretchable(0, true);
 			this.setColumnStretchable(1, true);
 			
 			
-			setData(message, timestamp, monitorID, isOutgoing, issent);
+			setData(message, timestamp, monitorID, isOutgoing, issent, isfinalized);
 			// TODO Auto-generated constructor stub
 		}
 
-		public void setData(String message, Date timestamp, int monitorID, boolean isOutgoing, boolean issent) {
+		public void setData(String message, Date timestamp, int monitorID, boolean isOutgoing, boolean issent, boolean isfinalized) {
 			txvDate.setText(Message.DisplayDateTimeFormat.format(timestamp));
 
 			Monitor m = MessageTranslator.GetMonitor(getContext(), monitorID);
-			// nicole
-			//txvFrom.setText(m.getPhone());
-			 if (issent) {
-		        	txvIssent.setImageResource(R.drawable.checkmark_on);
-		        } else {
-		        	txvIssent.setImageResource(R.drawable.checkmark_off);
-		        }
-
+			 if (issent && isfinalized) {
+		        txvIssent.setImageResource(R.drawable.checkmark_green);
+	        } else if (isfinalized) {
+	        	txvIssent.setImageResource(R.drawable.checkmark_blue);
+	        } else {
+	        	txvIssent.setImageResource(R.drawable.checkmark_grey);
+	        }
 			txvMessage.setText(message);
 		}
 

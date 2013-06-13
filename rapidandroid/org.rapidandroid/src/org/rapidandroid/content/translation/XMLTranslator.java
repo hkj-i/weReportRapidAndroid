@@ -59,7 +59,7 @@ public class XMLTranslator {
 	public void buildOpenRosaXform(Context context, int msgid, Form f) throws RemoteException {
 
 		String XML = "";
-		Integer wellFormed = 1;		
+		Integer wellFormed = 1;
 		// In order to construct an XML from a text message, we need:
 		//		- Survey ID from Aggregate
 		//		- instanceID
@@ -114,6 +114,7 @@ public class XMLTranslator {
 			projectname = "";
 		}
 		String[] args = {projectname};
+		Log.i("projjjject name", projectname);
 		Cursor projectRow = context.getContentResolver().query(RapidSmsDBConstants.Project.CONTENT_URI,
 				null,
 				"name = ?",
@@ -197,7 +198,7 @@ public class XMLTranslator {
 		for (int i = 0; i < columnNames.length; i++) {
 
 			if (columnNames[i].startsWith("col_")) {
-				String parsedfield = parsedDataRow.getString(i);
+				String parsedfield = processSpecialCharacters(parsedDataRow.getString(i));
 
 				// grab the fieldtype id corresponding to the sequence
 
@@ -214,7 +215,7 @@ public class XMLTranslator {
 						"_id = " + ftype_id,
 						null,
 						null);
-
+//nicole
 				Cursor questionType = context.getContentResolver().query(RapidSmsDBConstants.Form.CONTENT_URI, 
 						null,
 						"_id = " + f.getFormId(),  
@@ -237,7 +238,7 @@ public class XMLTranslator {
 						XML += "<" + "select" + select +">" + "No" + "</" + "select" + select +">";
 					}
 					select++;
-					
+					// nicole
 				} else if (questionType.getInt(questionType.getColumnIndex("question_type")) == SurveyCreationConstants.QuestionTypes.MULTIPLECHOICE) {
 					
 					String description = questionType.getString(questionType.getColumnIndex("description"));
@@ -246,27 +247,50 @@ public class XMLTranslator {
 						if (description.contains(j + ". ")) {
 							int k = j + 1;
 							if (description.contains(k + ". ")) {
-								selects[j-1] = description.substring(description.indexOf("" + j + ". ") +3, 
-																	description.indexOf("" + k + ". "));
+								selects[j-1] = description.substring(description.indexOf("" + j + ". ") + 3, 
+																	description.indexOf(",  " + k + ". "));
 							} else {
-								selects[j-1] = description.substring(description.indexOf("" + j + ". ") +3, 
-										Math.max(description.indexOf(".", description.indexOf("" + j + ". ") +3),
-												description.indexOf(" ", description.indexOf("" + j + ". ") +3)));
+								selects[j-1] = description.substring(description.indexOf("" + j + ". ") + 3, 
+										description.indexOf(".", description.indexOf("" + j + ". ") +3));
 							}
 						}
 					}
 					
 					int k = 0;
 					while (k < 4 && selects[k] != null) {
-						XML += "<" + "select" + select +">" + selects[k] + "</" + "select" + select +">";
 						k++;
-						select++;
+					}
+					Log.i("label",""+ k);
+					String[] labels = new String[k];
+					for (int j = 0; j < k; j++) {
+						
+						labels[j] = selects[j];
+						Log.i("label", labels[j]);
+					}
+					
+					try {
+						if (Integer.parseInt(parsedfield) <= k) {
+							XML += "<" + "select" + select +">" + selects[Integer.parseInt(parsedfield) - 1] + "</" + "select" + select +">";
+							select++;
+						} else {
+							wellFormed = 0;
+						}
+					} catch (NumberFormatException e) {
+						wellFormed = 0;
 					}
 					
 				} else {
-					// number
-					XML += "<" + "num" + num +">" + parsedfield + "</" + "num" + num +">";
-					num++;
+					// Rating
+					try {
+						if (Integer.parseInt(parsedfield) <= 10 && Integer.parseInt(parsedfield) >= 0) {
+							XML += "<" + "num" + num +">" + parsedfield + "</" + "num" + num +">";
+							num++;
+						} else {
+							wellFormed = 0;
+						}
+					} catch (NumberFormatException e) {
+						wellFormed = 0;
+					}
 				}
 				countm++;
 			}
@@ -309,7 +333,7 @@ public class XMLTranslator {
 		
 		Log.i("XML translate", "projectname = " + projectname);
 		projectRow.moveToFirst();
-		if (!projectname.equals("") && projectRow != null && projectRow.getColumnCount() != 0) {
+		if (projectname != null && !projectname.equals("") && projectRow != null && projectRow.getColumnCount() != 0) {
 			Log.i("XML", "getLocation");
 			Log.i("XML", "column count = " + projectRow.getColumnCount());
 			String loc = projectRow.getString(projectRow.getColumnIndex("location"));
@@ -341,12 +365,13 @@ public class XMLTranslator {
 		
 		// TODO this is super hacky and terrible coding
 		// If the response didn't include exactly the number of items we expected, it's malformed
-		if (messageRow.getString(messageRow.getColumnIndex("message")).split(" ").length != f.getFields().length + 2) {
+		if (messageRow.getString(messageRow.getColumnIndex("message")).split(" ").length != f.getFields().length + 1) {
 			Log.i("DatabaseQuery", "XML malformed: number of fields in response " + messageRow.getString(messageRow.getColumnIndex("message")).split(" ").length + ", number of fields expected " + f.getFields().length);
 			wellFormed = 0;
 		}
 		XML += "</data>";
 
+		
 		Log.i("DatabaseQuery", "XML string: " + XML);
 
 		// copied from Android dev external storage page
@@ -381,7 +406,6 @@ public class XMLTranslator {
 			File newFolder = new File(externalStorageDir.getAbsoluteFile() + 
 									"/odk/instances/" + instanceName + "/");
 			newFolder.mkdirs();
-
 		try {
 			// String filename = path + File.separator +
 			// path.substring(path.lastIndexOf(File.separator) + 1) + ".xml";
@@ -401,7 +425,14 @@ public class XMLTranslator {
 		ContentResolver resolver = context.getContentResolver();
 	     ContentValues values = new ContentValues();
 	     values.put("displayName", processedFormName); // make your own display name~
-	     values.put("status", "incomplete"); // you can mark it as complete
+	     
+	     // TODO need to figure out autosubmit to aggregate
+	    if (wellFormed == 0) {
+	    	values.put("status", "incomplete"); // you can mark it as complete
+	    } else {
+	    	values.put("status", "complete");
+	    }
+	     
 	     values.put("canEditWhenComplete", Boolean.toString(true));
 	     values.put("instanceFilePath", 
 	    		 newFolder + "/" + instanceName + ".xml"); // file path
@@ -430,7 +461,8 @@ public class XMLTranslator {
 		ContentResolver rapidResolver = context.getContentResolver();
 		ContentValues rapidValues = new ContentValues();
 		rapidValues.put("form_uri", uriOfForm.toString().substring(ODK_INSTANCE.length()));
-		rapidValues.put("is_sent", wellFormed);
+		rapidValues.put("is_sent", 0);
+		rapidValues.put("is_finalized", wellFormed);
 	     int colsChanged = rapidResolver.update(
 	    		 RapidSmsDBConstants.Message.CONTENT_URI,
 	    		 rapidValues,
@@ -456,6 +488,7 @@ public class XMLTranslator {
 
 	private String encryptPhonenumber(String phonenumber) {
 		Integer phoneN = Integer.parseInt(phonenumber);
+		phoneN += 12345;
 		return phoneN.toString();
 	}
 	private String processSpecialCharacters(String string) {

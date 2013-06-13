@@ -8,9 +8,10 @@
     
     <TextView
         android:text="@string/please_name_survey" 
+        android:textSize="18dp"
         android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
-    
+    	
     <EditText
 	    android:id="@+id/survey_name"
 	    android:layout_width="fill_parent"

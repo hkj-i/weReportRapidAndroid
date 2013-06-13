@@ -70,4 +70,7 @@
 <string name="survey_name_hint">Survey Name</string>
 <string name="survey_description_hint">Description</string>
 <string name="survey_location_hint">Location</string>
+<string name="button_viewsurveys">Existing Surveys</string>
+
+
 </resources>

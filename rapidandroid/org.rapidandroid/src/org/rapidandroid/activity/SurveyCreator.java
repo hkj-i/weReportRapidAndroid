@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class SurveyCreator extends Activity {
@@ -33,9 +34,9 @@ public class SurveyCreator extends Activity {
 		
 		ContentResolver resolver = getContentResolver();
 		ContentValues cv = new ContentValues();
-		cv.put("surveyname", "\'" + surveyName + "\'");
+		cv.put("surveyname", surveyName);
 		//TODO need to add field for description
-		cv.put("description", "\'" + description + "\'");
+		cv.put("description", description);
 		
 		String projectName = (String) getIntent().getExtras().get("project_name");
 		Log.i("SurveyCreator", "getting project name " + projectName);
@@ -43,20 +44,32 @@ public class SurveyCreator extends Activity {
 		
 		if (!projectName.equals("No Project ID")) {
 			
-			cv.put("project_id", "\'" + projectName + "\'");
+			cv.put("project_id", projectName);
 			 
 		}
 		
 		cv.put("phase", getIntent().getExtras().getInt("phase"));
-		cv.put("location", ((EditText) findViewById(R.id.survey_location)).getText().toString());
 		
-		resolver.insert(RapidSmsDBConstants.Survey.CONTENT_URI, cv);
+		String loc = ((EditText) findViewById(R.id.survey_location)).getText().toString();
 		
+		
+		//resolver.insert(RapidSmsDBConstants.Survey.CONTENT_URI, cv);
 		Intent intent = new Intent(this, QuestionChooser.class);
-		intent.putExtras(getIntent().getExtras());
-		intent.putExtra("surveyname", surveyName);
-		//Log.i("SurveyCreator", "starting intent");
-		startActivity(intent);
+		
+		if (description != null && !description.equals("")) {
+			intent.putExtra("surveydescription", description);
+		}
+		if (loc == null || loc.equals("") || loc.equals("Location")) {
+			Toast toast = Toast.makeText(this, "Please enter a location.", Toast.LENGTH_LONG);
+			toast.show();
+		} else {
+			cv.put("location", loc);
+			intent.putExtra("surveylocation", loc);
+			intent.putExtras(getIntent().getExtras());
+			intent.putExtra("surveyname", surveyName);
+			//Log.i("SurveyCreator", "starting intent");
+			startActivity(intent);
+		}
 			
 	}
 	
